@@ -70,6 +70,7 @@ revisarse directamente allí.
 
 Módulos principales:
 
+- `user`
 - `room`
 - `reservation`
 - Seguridad, configuración y gestión de errores como elementos transversales.
@@ -116,9 +117,10 @@ en sus especificaciones.
 
 **[Decidido]** La API cubrirá:
 
+- Creación de usuarios por administradores.
+- Autenticación mediante correo y contraseña.
 - Creación y consulta de salas.
 - Creación, consulta y cancelación de reservas.
-- Autenticación.
 
 Las rutas, contratos, filtros, paginación, validaciones y respuestas de error se definirán en
 cada especificación.
@@ -132,13 +134,18 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Autenticación mediante JWT firmado con HS256.
 - Usuarios persistidos en PostgreSQL.
 - Contraseñas almacenadas con BCrypt.
+- Roles `USER` y `ADMIN`.
+- Login público mediante `POST /v1/users/login`.
+- Creación de usuarios mediante `POST /v1/users`, restringida a `ADMIN`.
+- Tokens con vigencia de 24 horas y claims `sub`, `role`, `iat`, `exp` e `iss`.
+- El emisor del token es `meetroom`.
+- No se incluyen renovación ni revocación de tokens.
 - Consultas públicas.
 - Creación y cancelación protegidas.
 - Secretos obtenidos mediante configuración externa.
-- Gestión centralizada y segura de errores.
+- Gestión centralizada y segura de errores con tipos y detalles descriptivos.
 
-Los claims, duración del token, roles, endpoint de autenticación y formato de errores permanecen
-pendientes de especificación.
+Las reglas específicas de cada endpoint se definen en su especificación.
 
 ## Configuración
 
@@ -183,3 +190,13 @@ meetroom_local_config/specs/NNN-nombre-funcionalidad/
 - `task.md` se utiliza cuando la implementación requiere varias tareas.
 - La numeración usa el siguiente valor disponible.
 - No se renumeran especificaciones existentes.
+
+Funcionalidades definidas:
+
+- `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT.
+- `002-autenticacion`: login y emisión de tokens JWT.
+
+Funcionalidades previstas:
+
+- `003`: gestión de salas.
+- `004`: reservas.

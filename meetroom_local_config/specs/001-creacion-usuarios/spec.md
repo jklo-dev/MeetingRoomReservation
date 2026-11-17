@@ -78,8 +78,6 @@ La contraseña se almacena únicamente como hash BCrypt.
 
 ## 5. Endpoint
 
-**[Propuesta]**
-
 ```http
 POST /v1/users
 Authorization: Bearer <token>
@@ -104,7 +102,7 @@ Validaciones:
 
 - Todos los campos son obligatorios.
 - El correo debe tener formato válido.
-- La contraseña debe tener entre 4 y 72 bytes en UTF-8.
+- La contraseña debe tener entre **[Pendiente]** y 72 bytes en UTF-8.
 - Nombre y apellido no pueden quedar vacíos después de recortarlos.
 - El rol distingue mayúsculas y debe ser `USER` o `ADMIN`.
 - Los campos JSON desconocidos **[Propuesta]** se rechazan.
@@ -173,7 +171,7 @@ un `title` y un `detail` específicos.
 
 - JWT firmado con HS256.
 - La clave se obtiene de configuración externa.
-- El rol se obtiene del claim **[Propuesta]** `role`.
+- El rol se obtiene del claim `role`.
 - El claim debe contener exactamente `USER` o `ADMIN`.
 - Un token sin un rol válido no autoriza la operación.
 - La API no utiliza sesiones.
@@ -216,6 +214,4 @@ Se comprobarán:
 
 - Longitud mínima de la contraseña.
 - Contraseña o mecanismo de configuración del administrador inicial.
-- Confirmar la ruta `/v1/users`.
-- Confirmar el claim JWT `role`.
 - Confirmar si los campos JSON desconocidos se rechazan.
