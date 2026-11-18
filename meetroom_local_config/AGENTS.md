@@ -139,6 +139,10 @@ procede del claim `sub` y los campos desconocidos del cuerpo se ignoran.
 la reserva, registra quién y cuándo canceló y usa un bloqueo de fila con espera máxima de 5
 segundos.
 
+`GET /v1/reservations` es público y admite filtros acumulativos por sala, responsable, estado y
+rango temporal. El rango usa semántica semiabierta; el resultado se ordena por inicio y está
+paginado.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -220,7 +224,4 @@ Funcionalidades definidas:
 - `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; aprobada.
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
   aprobada.
-
-Funcionalidades previstas:
-
-- Listado de reservas a partir de `007`.
+- `007-listado-reservas`: listado público con filtros, ordenación y paginación; aprobada.
