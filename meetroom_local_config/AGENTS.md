@@ -125,6 +125,10 @@ en sus especificaciones.
 Las rutas, contratos, filtros, paginación, validaciones y respuestas de error se definirán en
 cada especificación.
 
+El listado público `GET /v1/rooms` devuelve por defecto salas `ACTIVE`, ordenadas por nombre y
+paginadas con tamaño 20. Admite filtros acumulativos por estado, capacidad mínima y nombre,
+además de ordenación y paginación.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -197,7 +201,8 @@ Funcionalidades definidas:
 - `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT.
 - `002-autenticacion`: login y emisión de tokens JWT.
 - `003-creacion-salas`: creación de salas por administradores.
+- `004-listado-salas`: listado público de salas con filtros, ordenación y paginación.
 
 Funcionalidades previstas:
 
-- `004`: reservas.
+- `005`: reservas.
