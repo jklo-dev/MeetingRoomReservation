@@ -159,6 +159,21 @@ class RoomControllerTest {
     }
 
     @Test
+    @DisplayName("400 cuando la capacidad es decimal")
+    void rechazaCapacidadDecimal() throws Exception {
+        mockMvc.perform(post("/v1/rooms")
+                        .header("Authorization", "Bearer " + adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "Sala Azul", "capacity": 12.5 }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.type")
+                        .value("urn:meetroom:problem:validation-error"))
+                .andExpect(jsonPath("$.errors[0].field").value("capacity"));
+    }
+
+    @Test
     @DisplayName("409 room-name-already-exists cuando el nombre ya existe")
     void rechazaNombreDuplicado() throws Exception {
         willThrow(new RoomNameAlreadyExistsException())

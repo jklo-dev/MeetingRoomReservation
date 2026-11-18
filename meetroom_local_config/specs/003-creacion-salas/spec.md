@@ -175,7 +175,7 @@ Ejemplo de conflicto:
 | Capacidad `0` o `1001` | `400` |
 | Capacidad `1` o `1000` | `201` |
 | Capacidad textual | `400` |
-| Capacidad decimal | Se espera `400`, pero no existe una prueba específica que lo confirme |
+| Capacidad decimal | `400` |
 | Campo `status` o cualquier otro campo desconocido | Se ignora |
 | JSON vacío o mal formado | `400` |
 | Usuario autenticado sin rol `ADMIN` | `403` |
@@ -214,7 +214,6 @@ Se comprobarán:
 - No existen atributos de ubicación o equipamiento.
 - El nombre se valida antes de recortar espacios; un valor que exceda 100 caracteres solo por
   espacios exteriores puede rechazarse.
-- No existe una prueba específica que confirme el rechazo de capacidades decimales.
 - Cualquier violación de integridad durante el guardado se traduce actualmente como conflicto de
   nombre duplicado.
 - No existe una prueba realmente concurrente de la colisión de nombres.
