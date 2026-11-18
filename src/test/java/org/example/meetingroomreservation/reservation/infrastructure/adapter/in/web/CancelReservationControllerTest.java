@@ -60,6 +60,7 @@ class CancelReservationControllerTest {
     @MockitoBean
     private CreateReservation createReservation;
 
+    /** El controlador tambien depende del listado; aqui no se ejercita. */
     @MockitoBean
     private org.example.meetingroomreservation.reservation.domain.port.in.ListReservations listReservations;
 

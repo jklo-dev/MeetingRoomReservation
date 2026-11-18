@@ -53,6 +53,7 @@ y JPA y las migraciones hasta `V5__add_reservation_cancellation.sql`.
 | --- | --- |
 | Java | 21 |
 | Spring Boot | 4.1.2 |
+| Springdoc OpenAPI | 3.2.0 |
 | Gradle | 9.9.1, Kotlin DSL |
 | Base de datos prevista | PostgreSQL |
 | Paquete base | `org.example.meetingroomreservation` |
@@ -147,6 +148,10 @@ por inicio y está paginado. Un bearer inválido o caducado devuelve `401`.
 **[Verificado]** `GET /actuator/health` es público y comprueba el estado de la aplicación y su
 acceso a la base de datos. Solo expone el estado global, sin detalles de componentes.
 
+**[Verificado]** Swagger UI está disponible públicamente en `/swagger-ui/index.html` y el
+documento OpenAPI JSON en `/v3/api-docs`. Los controladores documentan sus operaciones y los
+endpoints protegidos utilizan el esquema JWT bearer `bearerAuth`.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -171,6 +176,8 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Creación y cancelación protegidas.
 - Secretos obtenidos mediante configuración externa.
 - Gestión centralizada y segura de errores con tipos y detalles descriptivos.
+- Swagger UI y el documento OpenAPI son públicos; la autorización de operaciones protegidas se
+  documenta mediante el esquema JWT bearer `bearerAuth`.
 
 Las reglas específicas de cada endpoint se definen en su especificación.
 

@@ -63,6 +63,12 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
+                        // Swagger UI y el documento OpenAPI. Publicos porque la interfaz solo es
+                        // util si se puede abrir, lo que expone el contrato completo de la API,
+                        // endpoints de administracion incluidos. Aceptable en una prueba tecnica;
+                        // en produccion iria detras de autenticacion.
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs", "/v3/api-docs/**").permitAll()
                         // El login es el endpoint que proporciona la autenticacion, asi que no
                         // puede exigirla. Debe declararse antes que la regla de /v1/users.
                         .requestMatchers(HttpMethod.POST, "/v1/users/login").permitAll()

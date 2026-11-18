@@ -90,6 +90,7 @@ class CreateReservationServiceTest {
             return reservation;
         }
 
+        /** El listado no se ejercita en este test. */
         @Override
         public org.example.meetingroomreservation.shared.domain.PageResult<
                 org.example.meetingroomreservation.reservation.domain.model.ReservationDetail>

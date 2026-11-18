@@ -26,7 +26,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
+    // Aporta /actuator/health, que comprueba el DataSource de serie. La superficie expuesta se
+    // limita en application.yaml a solo ese endpoint.
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // Swagger UI y el documento OpenAPI. La version se fija a mano porque springdoc no esta en
+    // el BOM de Spring Boot: las 2.x apuntan a Boot 3 y las 3.x a Boot 4.
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
