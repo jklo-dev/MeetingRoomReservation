@@ -68,6 +68,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/v1/rooms").hasRole("ADMIN")
+                        // Por el requisito 5 de la prueba, los endpoints de consulta son
+                        // publicos.
+                        .requestMatchers(HttpMethod.GET, "/v1/rooms").permitAll()
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
                         .anyRequest().denyAll())

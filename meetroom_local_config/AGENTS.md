@@ -37,8 +37,8 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 
 ## Estado actual
 
-**[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación y 003 de
-creación de salas están implementadas.
+**[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación, 003 de
+creación de salas y 004 de listado de salas están implementadas.
 
 Actualmente existen el dominio de usuarios, los casos de uso de creación y autenticación,
 adaptadores web, JPA y JWT, migraciones Flyway, validación y emisión de tokens, manejo centralizado
@@ -115,6 +115,7 @@ sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máx
 **[Verificado]** `POST /v1/users` crea usuarios y requiere un JWT con rol `ADMIN`.
 `POST /v1/users/login` es público y emite tokens JWT.
 `POST /v1/rooms` crea salas y requiere un JWT con rol `ADMIN`.
+`GET /v1/rooms` lista salas y es público; un bearer inválido o caducado devuelve `401`.
 
 **[Decidido]** La API cubrirá:
 
@@ -220,7 +221,8 @@ Funcionalidades definidas:
   implementada.
 - `002-autenticacion`: login y emisión de tokens JWT; implementada.
 - `003-creacion-salas`: creación de salas por administradores; implementada.
-- `004-listado-salas`: listado público de salas con filtros, ordenación y paginación; aprobada.
+- `004-listado-salas`: listado público de salas con filtros, ordenación y paginación;
+  implementada.
 - `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; aprobada.
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
   aprobada.

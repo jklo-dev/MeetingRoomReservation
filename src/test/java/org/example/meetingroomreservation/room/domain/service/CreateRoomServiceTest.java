@@ -42,6 +42,12 @@ class CreateRoomServiceTest {
             guardadas.add(room);
             return room;
         }
+
+        @Override
+        public org.example.meetingroomreservation.shared.domain.PageResult<Room> search(
+                org.example.meetingroomreservation.room.domain.port.in.ListRoomsQuery query) {
+            throw new UnsupportedOperationException("no se usa en este test");
+        }
     }
 
     private final FakeRoomRepository repository = new FakeRoomRepository();

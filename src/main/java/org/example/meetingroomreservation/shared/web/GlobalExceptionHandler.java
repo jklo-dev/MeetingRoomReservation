@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Traduce excepciones a respuestas {@code application/problem+json}.
@@ -39,6 +40,35 @@ public class GlobalExceptionHandler {
         ProblemDetail problem = problem(HttpStatus.BAD_REQUEST,
                 "La peticion contiene campos invalidos", ProblemTypes.VALIDATION_ERROR, request);
         problem.setProperty("errors", errors);
+        return problem;
+    }
+
+    /**
+     * Parametro de consulta invalido. Usa la misma forma que la validacion del body, con el
+     * array {@code errors}, para que toda la API tenga un unico formato de error de validacion.
+     */
+    @ExceptionHandler(InvalidQueryParameterException.class)
+    ProblemDetail handleInvalidQueryParameter(InvalidQueryParameterException e,
+                                             WebRequest request) {
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST,
+                "La peticion contiene parametros invalidos", ProblemTypes.VALIDATION_ERROR,
+                request);
+        problem.setProperty("errors",
+                List.of(new FieldErrorDetail(e.field(), e.getMessage())));
+        return problem;
+    }
+
+    /**
+     * Un parametro de consulta numerico que no se puede convertir, por ejemplo
+     * {@code minCapacity=abc}. Spring falla al convertir el tipo antes de llegar al controlador.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException e, WebRequest request) {
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST,
+                "La peticion contiene parametros invalidos", ProblemTypes.VALIDATION_ERROR,
+                request);
+        problem.setProperty("errors",
+                List.of(new FieldErrorDetail(e.getName(), "no tiene un valor valido")));
         return problem;
     }
 

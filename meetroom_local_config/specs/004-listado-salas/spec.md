@@ -1,6 +1,6 @@
 # 004 — Listado de salas
 
-**Estado**: aprobada.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -17,7 +17,7 @@ Incluye:
 - Ordenación por nombre o capacidad.
 - Paginación.
 - Validación de parámetros.
-- Pruebas de caso de uso, web e integración.
+- Pruebas de dominio, web y composición de filtros.
 
 No incluye:
 
@@ -34,7 +34,8 @@ No requiere dependencias nuevas.
 GET /v1/rooms
 ```
 
-Es público y no requiere autenticación. Si se envía una cabecera `Authorization`, no se evalúa.
+Es público y no requiere autenticación. Si se envía una cabecera `Authorization`, el filtro de
+seguridad la evalúa: un token válido se acepta y uno inválido o caducado devuelve `401`.
 
 ### Parámetros
 
@@ -44,7 +45,7 @@ Todos son opcionales y acumulativos.
 | --- | --- | --- |
 | `minCapacity` | Entero entre 1 y 1000 | Sin filtro |
 | `status` | `ACTIVE`, `INACTIVE` o `ALL` | `ACTIVE` |
-| `name` | Máximo 100 caracteres; búsqueda parcial sin distinguir mayúsculas | Sin filtro |
+| `name` | Búsqueda parcial sin distinguir mayúsculas | Sin filtro |
 | `sortBy` | `name` o `capacity` | `name` |
 | `direction` | `asc` o `desc` | `asc` |
 | `page` | Entero mayor o igual a 0 | `0` |
@@ -106,27 +107,28 @@ Los parámetros inválidos devuelven `400` con `application/problem+json`.
 
 | Tipo | Motivo |
 | --- | --- |
-| `/problems/invalid-query-parameter` | Un parámetro no cumple sus reglas |
+| `urn:meetroom:problem:validation-error` | Un parámetro no cumple sus reglas |
 
 ```json
 {
-  "type": "/problems/invalid-query-parameter",
-  "title": "Parámetros de consulta inválidos",
+  "type": "urn:meetroom:problem:validation-error",
+  "title": "Bad Request",
   "status": 400,
-  "detail": "El parámetro sortBy debe ser name o capacity",
+  "detail": "La petición contiene parametros invalidos",
   "instance": "/v1/rooms",
   "errors": [
     {
       "field": "sortBy",
-      "message": "Debe ser uno de: name, capacity"
+      "message": "debe ser uno de: name, capacity"
     }
   ]
 }
 ```
 
-Cada parámetro inválido genera un elemento descriptivo en `errors`.
+Cada parámetro inválido genera un elemento descriptivo en `errors`, excepto `minCapacity` fuera
+del rango 1–1000, que actualmente devuelve el mismo tipo sin ese array.
 
-El endpoint no devuelve `401` ni `403`.
+El endpoint no devuelve `403`. Devuelve `401` si se envía un bearer inválido o caducado.
 
 ## 6. Reglas
 
@@ -139,7 +141,7 @@ El endpoint no devuelve `401` ni `403`.
 - El orden por nombre usa su representación en minúsculas.
 - Todo orden incluye `id` como desempate para estabilizar la paginación.
 - Una página posterior a la última devuelve `200` con `content` vacío.
-- El endpoint no procesa tokens.
+- El endpoint no requiere token, pero el filtro de seguridad procesa cualquier bearer enviado.
 
 ## 7. Casos relevantes
 
@@ -157,7 +159,8 @@ El endpoint no devuelve `401` ni `403`.
 | Tamaño muy grande | Se acepta |
 | Página fuera de rango | `200` con contenido vacío |
 | Inventario vacío | `200` con paginación vacía |
-| Token válido o caducado | Se ignora |
+| Token válido | Se acepta |
+| Token inválido o caducado | `401` |
 
 ## 8. Diseño
 
@@ -174,6 +177,7 @@ Los tipos de paginación podrán reutilizarse en la futura funcionalidad de list
 ## 9. Criterios de aceptación
 
 - `GET /v1/rooms` funciona sin token.
+- Un token válido se acepta y uno inválido o caducado devuelve `401`.
 - Sin parámetros devuelve únicamente salas activas.
 - Los filtros por estado, capacidad y nombre funcionan de forma individual y combinada.
 - La búsqueda por nombre no distingue mayúsculas.
@@ -197,9 +201,16 @@ Se comprobarán:
 - Parámetros inválidos.
 - Acceso público con token ausente, válido o caducado.
 
+No existe una prueba de integración del listado contra PostgreSQL. Los filtros, la ordenación y
+la paginación JPA no se comprueban actualmente sobre datos reales.
+
 ## 11. Limitaciones conocidas
 
 - El tamaño de página no tiene máximo.
 - La búsqueda parcial puede requerir un recorrido completo.
 - La búsqueda no ignora acentos.
 - El total de elementos requiere una consulta de recuento.
+- `minCapacity` fuera de rango devuelve `validation-error` sin el array `errors`.
+- El filtro `name` no aplica un límite máximo de longitud.
+- La ordenación mediante `lower(name)` depende de la collation configurada en PostgreSQL.
+- `totalPages` se convierte a `int` y puede desbordarse con cantidades extremas de resultados.

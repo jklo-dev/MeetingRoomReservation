@@ -3,10 +3,12 @@ package org.example.meetingroomreservation.room.infrastructure.adapter.out.jpa;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-interface RoomJpaRepository extends JpaRepository<RoomJpaEntity, UUID> {
+interface RoomJpaRepository extends JpaRepository<RoomJpaEntity, UUID>,
+        JpaSpecificationExecutor<RoomJpaEntity> {
 
     /**
      * Compara sobre el nombre en minusculas, igual que el indice unico

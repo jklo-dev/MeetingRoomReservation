@@ -55,6 +55,10 @@ class RoomControllerTest {
     @MockitoBean
     private CreateRoom createRoom;
 
+    /** El controlador tambien depende del listado; aqui no se ejercita. */
+    @MockitoBean
+    private org.example.meetingroomreservation.room.domain.port.in.ListRooms listRooms;
+
     private String adminToken() {
         return TestJwtFactory.tokenFor(ADMIN_ID, "ADMIN");
     }
