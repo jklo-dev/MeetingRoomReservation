@@ -1,6 +1,7 @@
 package org.example.meetingroomreservation.room.infrastructure.adapter.in.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -81,6 +82,22 @@ class RoomControllerTest {
                 .andExpect(jsonPath("$.capacity").value(12))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.createdAt").exists());
+    }
+
+    @Test
+    @DisplayName("valida el nombre despues de recortar sus espacios exteriores")
+    void recortaElNombreAntesDeValidarlo() throws Exception {
+        String nombre = "A".repeat(100);
+        Room creada = Room.restore(SALA_ID, nombre, 12, RoomStatus.ACTIVE,
+                OffsetDateTime.parse("2026-11-17T10:00:00+01:00"));
+        given(createRoom.create(argThat(command -> nombre.equals(command.name()))))
+                .willReturn(creada);
+
+        mockMvc.perform(post("/v1/rooms")
+                        .header("Authorization", "Bearer " + adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"name\": \"  " + nombre + "  \", \"capacity\": 12 }"))
+                .andExpect(status().isCreated());
     }
 
     @Test

@@ -24,4 +24,10 @@ record CreateRoomRequest(
         @Min(value = 1, message = "debe estar entre 1 y 1000")
         @Max(value = 1000, message = "debe estar entre 1 y 1000")
         Integer capacity) {
+
+    CreateRoomRequest {
+        if (name != null) {
+            name = name.trim();
+        }
+    }
 }

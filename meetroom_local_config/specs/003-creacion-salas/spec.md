@@ -212,8 +212,6 @@ Se comprobarán:
 - Los espacios interiores múltiples no se normalizan.
 - No pueden modificarse los datos de una sala.
 - No existen atributos de ubicación o equipamiento.
-- El nombre se valida antes de recortar espacios; un valor que exceda 100 caracteres solo por
-  espacios exteriores puede rechazarse.
 - Cualquier violación de integridad durante el guardado se traduce actualmente como conflicto de
   nombre duplicado.
 - No existe una prueba realmente concurrente de la colisión de nombres.
