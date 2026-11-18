@@ -1,8 +1,6 @@
 # 003 — Creación de salas
 
-**Estado**: pendiente de aprobación.
-
-Las decisiones marcadas como **[Propuesta]** requieren aprobación.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -40,7 +38,7 @@ Cada sala contiene:
 | `name` | Obligatorio, máximo 100 caracteres y único sin distinguir mayúsculas |
 | `capacity` | Entero entre 1 y 1000 |
 | `status` | `ACTIVE` o `INACTIVE` |
-| `createdAt` | Instante de creación en UTC |
+| `createdAt` | Instante de creación con offset |
 
 El nombre elimina los espacios exteriores, pero conserva su capitalización y espacios interiores.
 
@@ -48,7 +46,7 @@ Toda sala se crea con estado `ACTIVE`.
 
 ## 4. Persistencia
 
-**[Propuesta]** Tabla `rooms`:
+Tabla `rooms`:
 
 | Columna | Tipo | Restricciones |
 | --- | --- | --- |
@@ -64,8 +62,6 @@ duplicados con distinta capitalización y conserva el nombre original.
 La migración crea la tabla, sus restricciones y el índice único.
 
 ## 5. Endpoint
-
-**[Propuesta]**
 
 ```http
 POST /v1/rooms
@@ -92,7 +88,7 @@ Validaciones:
 - `capacity` es obligatoria.
 - La capacidad debe ser un entero entre 1 y 1000.
 - El estado no se acepta en la petición.
-- Los campos desconocidos **[Propuesta]** se rechazan.
+- Los campos desconocidos se ignoran.
 
 ### Respuesta satisfactoria
 
@@ -115,12 +111,11 @@ Location: /v1/rooms/{id}
 
 | Estado | Tipo | Motivo |
 | --- | --- | --- |
-| `400` | `/problems/validation-error` | Uno o más campos son inválidos |
-| `400` | `/problems/malformed-json` | El cuerpo no contiene JSON válido |
-| `400` | `/problems/unknown-field` | El cuerpo contiene un campo no admitido |
-| `401` | `/problems/authentication-required` | Falta el token o no es válido |
-| `403` | `/problems/insufficient-permissions` | El usuario no tiene rol `ADMIN` |
-| `409` | `/problems/room-name-conflict` | Ya existe una sala con ese nombre |
+| `400` | `urn:meetroom:problem:validation-error` | Uno o más campos son inválidos |
+| `400` | `urn:meetroom:problem:malformed-request` | El cuerpo no se puede interpretar |
+| `401` | `urn:meetroom:problem:authentication-required` | Falta el token o no es válido |
+| `403` | `urn:meetroom:problem:insufficient-role` | El usuario no tiene rol `ADMIN` |
+| `409` | `urn:meetroom:problem:room-name-already-exists` | Ya existe una sala con ese nombre |
 
 Los errores utilizan `application/problem+json`, con un `type` y un `detail` que describen la
 causa concreta.
@@ -129,15 +124,15 @@ Ejemplo de validación:
 
 ```json
 {
-  "type": "/problems/validation-error",
-  "title": "Datos de sala inválidos",
+  "type": "urn:meetroom:problem:validation-error",
+  "title": "Bad Request",
   "status": 400,
-  "detail": "La capacidad debe estar entre 1 y 1000",
+  "detail": "La petición contiene campos inválidos",
   "instance": "/v1/rooms",
   "errors": [
     {
       "field": "capacity",
-      "message": "La capacidad debe estar entre 1 y 1000"
+      "message": "debe estar entre 1 y 1000"
     }
   ]
 }
@@ -147,8 +142,8 @@ Ejemplo de conflicto:
 
 ```json
 {
-  "type": "/problems/room-name-conflict",
-  "title": "Nombre de sala duplicado",
+  "type": "urn:meetroom:problem:room-name-already-exists",
+  "title": "Conflict",
   "status": 409,
   "detail": "Ya existe una sala con el nombre indicado",
   "instance": "/v1/rooms"
@@ -157,7 +152,8 @@ Ejemplo de conflicto:
 
 ## 6. Reglas
 
-- El nombre se recorta antes de validarlo, compararlo y almacenarlo.
+- La capa web valida la longitud antes del recorte; el dominio lo recorta antes de compararlo y
+  almacenarlo.
 - La comparación de nombres no distingue mayúsculas.
 - El nombre almacenado conserva su capitalización original.
 - La unicidad se comprueba en la aplicación y en la base de datos.
@@ -178,8 +174,9 @@ Ejemplo de conflicto:
 | Nombre existente con distinta capitalización | `409` |
 | Capacidad `0` o `1001` | `400` |
 | Capacidad `1` o `1000` | `201` |
-| Capacidad decimal o textual | `400` |
-| Campo `status` o cualquier otro campo desconocido | **[Propuesta]** `400` |
+| Capacidad textual | `400` |
+| Capacidad decimal | Se espera `400`, pero no existe una prueba específica que lo confirme |
+| Campo `status` o cualquier otro campo desconocido | Se ignora |
 | JSON vacío o mal formado | `400` |
 | Usuario autenticado sin rol `ADMIN` | `403` |
 | Petición sin token | `401` |
@@ -207,7 +204,6 @@ Se comprobarán:
 - Validación de capacidad y valores límite.
 - Creación satisfactoria.
 - Nombre duplicado con distinta capitalización.
-- Colisión concurrente.
 - Respuestas `400`, `401`, `403` y `409`.
 - Aplicación de la migración y funcionamiento del índice único.
 
@@ -216,10 +212,13 @@ Se comprobarán:
 - Los espacios interiores múltiples no se normalizan.
 - No pueden modificarse los datos de una sala.
 - No existen atributos de ubicación o equipamiento.
+- El nombre se valida antes de recortar espacios; un valor que exceda 100 caracteres solo por
+  espacios exteriores puede rechazarse.
+- No existe una prueba específica que confirme el rechazo de capacidades decimales.
+- Cualquier violación de integridad durante el guardado se traduce actualmente como conflicto de
+  nombre duplicado.
+- No existe una prueba realmente concurrente de la colisión de nombres.
 
 ## 11. Decisiones pendientes
 
-- Confirmar la ruta `/v1/rooms`.
-- Confirmar el esquema de la tabla.
-- Confirmar que los campos desconocidos se rechazan.
-- Confirmar si se creará documentación separada para el endpoint.
+No quedan decisiones pendientes para esta funcionalidad.

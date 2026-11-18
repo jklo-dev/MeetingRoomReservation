@@ -22,6 +22,8 @@ public final class ProblemTypes {
     public static final URI INVALID_CREDENTIALS = URI.create(PREFIX + "invalid-credentials");
     public static final URI INSUFFICIENT_ROLE = URI.create(PREFIX + "insufficient-role");
     public static final URI EMAIL_ALREADY_EXISTS = URI.create(PREFIX + "email-already-exists");
+    public static final URI ROOM_NAME_ALREADY_EXISTS =
+            URI.create(PREFIX + "room-name-already-exists");
 
     private ProblemTypes() {
     }

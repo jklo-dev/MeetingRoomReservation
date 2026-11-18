@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.example.meetingroomreservation.room.domain.exception.RoomNameAlreadyExistsException;
 import org.example.meetingroomreservation.user.domain.exception.EmailAlreadyExistsException;
 import org.example.meetingroomreservation.user.domain.exception.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
@@ -57,6 +58,12 @@ public class GlobalExceptionHandler {
     ProblemDetail handleEmailExists(EmailAlreadyExistsException e, WebRequest request) {
         return problem(HttpStatus.CONFLICT, e.getMessage(), ProblemTypes.EMAIL_ALREADY_EXISTS,
                 request);
+    }
+
+    @ExceptionHandler(RoomNameAlreadyExistsException.class)
+    ProblemDetail handleRoomNameExists(RoomNameAlreadyExistsException e, WebRequest request) {
+        return problem(HttpStatus.CONFLICT, e.getMessage(),
+                ProblemTypes.ROOM_NAME_ALREADY_EXISTS, request);
     }
 
     /**

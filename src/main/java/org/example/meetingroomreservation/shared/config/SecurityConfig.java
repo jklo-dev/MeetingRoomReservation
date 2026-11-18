@@ -67,6 +67,7 @@ public class SecurityConfig {
                         // puede exigirla. Debe declararse antes que la regla de /v1/users.
                         .requestMatchers(HttpMethod.POST, "/v1/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/v1/rooms").hasRole("ADMIN")
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
                         .anyRequest().denyAll())
