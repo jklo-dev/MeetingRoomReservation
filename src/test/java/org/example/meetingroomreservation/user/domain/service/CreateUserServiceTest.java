@@ -40,6 +40,13 @@ class CreateUserServiceTest {
         }
 
         @Override
+        public java.util.Optional<User> findByEmail(String normalizedEmail) {
+            return guardados.stream()
+                    .filter(u -> u.email().equals(normalizedEmail))
+                    .findFirst();
+        }
+
+        @Override
         public User save(User user) {
             guardados.add(user);
             return user;
@@ -54,6 +61,16 @@ class CreateUserServiceTest {
         public String hash(String rawPassword) {
             this.ultimaContrasenaRecibida = rawPassword;
             return "hash(" + rawPassword + ")";
+        }
+
+        @Override
+        public boolean matches(String rawPassword, String passwordHash) {
+            return passwordHash.equals("hash(" + rawPassword + ")");
+        }
+
+        @Override
+        public boolean matchesDecoy(String rawPassword) {
+            return false;
         }
     }
 

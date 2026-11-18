@@ -24,6 +24,11 @@ class UserJpaAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public java.util.Optional<User> findByEmail(String normalizedEmail) {
+        return repository.findByEmail(normalizedEmail).map(UserJpaEntity::toDomain);
+    }
+
+    @Override
     public User save(User user) {
         try {
             return repository.save(UserJpaEntity.fromDomain(user)).toDomain();

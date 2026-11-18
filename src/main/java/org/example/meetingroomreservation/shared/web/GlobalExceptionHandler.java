@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.example.meetingroomreservation.user.domain.exception.EmailAlreadyExistsException;
+import org.example.meetingroomreservation.user.domain.exception.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -56,6 +57,16 @@ public class GlobalExceptionHandler {
     ProblemDetail handleEmailExists(EmailAlreadyExistsException e, WebRequest request) {
         return problem(HttpStatus.CONFLICT, e.getMessage(), ProblemTypes.EMAIL_ALREADY_EXISTS,
                 request);
+    }
+
+    /**
+     * Correo inexistente y contrasena incorrecta producen esta misma respuesta, sin distinguir
+     * la causa: lo contrario permitiria averiguar que correos estan registrados.
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ProblemDetail handleInvalidCredentials(InvalidCredentialsException e, WebRequest request) {
+        return problem(HttpStatus.UNAUTHORIZED, "Credenciales invalidas",
+                ProblemTypes.INVALID_CREDENTIALS, request);
     }
 
     /**

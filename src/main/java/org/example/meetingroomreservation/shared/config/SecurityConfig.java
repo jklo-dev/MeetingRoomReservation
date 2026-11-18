@@ -2,6 +2,8 @@ package org.example.meetingroomreservation.shared.config;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+
 import org.example.meetingroomreservation.shared.web.ProblemResponseWriter;
 import org.example.meetingroomreservation.shared.web.ProblemTypes;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,7 +19,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -59,6 +63,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
+                        // El login es el endpoint que proporciona la autenticacion, asi que no
+                        // puede exigirla. Debe declararse antes que la regla de /v1/users.
+                        .requestMatchers(HttpMethod.POST, "/v1/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users").hasRole("ADMIN")
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
@@ -85,10 +92,22 @@ public class SecurityConfig {
      */
     @Bean
     JwtDecoder jwtDecoder(JwtProperties properties) {
-        SecretKeySpec key = new SecretKeySpec(properties.secretBytes(), "HmacSHA256");
-        return NimbusJwtDecoder.withSecretKey(key)
+        return NimbusJwtDecoder.withSecretKey(secretKey(properties))
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
+    }
+
+    /**
+     * Emite los tokens con la **misma** clave que valida el decoder de arriba. Si divergieran,
+     * la API rechazaria los tokens que ella misma acaba de emitir.
+     */
+    @Bean
+    JwtEncoder jwtEncoder(JwtProperties properties) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey(properties)));
+    }
+
+    private SecretKeySpec secretKey(JwtProperties properties) {
+        return new SecretKeySpec(properties.secretBytes(), "HmacSHA256");
     }
 
     /**

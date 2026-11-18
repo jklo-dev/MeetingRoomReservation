@@ -19,6 +19,7 @@ public final class ProblemTypes {
     public static final URI VALIDATION_ERROR = URI.create(PREFIX + "validation-error");
     public static final URI MALFORMED_REQUEST = URI.create(PREFIX + "malformed-request");
     public static final URI AUTHENTICATION_REQUIRED = URI.create(PREFIX + "authentication-required");
+    public static final URI INVALID_CREDENTIALS = URI.create(PREFIX + "invalid-credentials");
     public static final URI INSUFFICIENT_ROLE = URI.create(PREFIX + "insufficient-role");
     public static final URI EMAIL_ALREADY_EXISTS = URI.create(PREFIX + "email-already-exists");
 

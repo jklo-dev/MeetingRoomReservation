@@ -61,6 +61,10 @@ class UserControllerTest {
     @MockitoBean
     private CreateUser createUser;
 
+    /** El controlador tambien depende del login; aqui no se ejercita. */
+    @MockitoBean
+    private org.example.meetingroomreservation.user.domain.port.in.AuthenticateUser authenticateUser;
+
     private String adminToken() {
         return TestJwtFactory.tokenFor(ADMIN_ID, "ADMIN");
     }

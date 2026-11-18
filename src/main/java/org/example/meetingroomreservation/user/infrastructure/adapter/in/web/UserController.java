@@ -5,6 +5,8 @@ import java.net.URI;
 import jakarta.validation.Valid;
 
 import org.example.meetingroomreservation.user.domain.model.User;
+import org.example.meetingroomreservation.user.domain.port.in.AuthenticateUser;
+import org.example.meetingroomreservation.user.domain.port.in.AuthenticateUserCommand;
 import org.example.meetingroomreservation.user.domain.port.in.CreateUser;
 import org.example.meetingroomreservation.user.domain.port.in.CreateUserCommand;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +26,23 @@ import org.springframework.web.bind.annotation.RestController;
 class UserController {
 
     private final CreateUser createUser;
+    private final AuthenticateUser authenticateUser;
 
-    UserController(CreateUser createUser) {
+    UserController(CreateUser createUser, AuthenticateUser authenticateUser) {
         this.createUser = createUser;
+        this.authenticateUser = authenticateUser;
+    }
+
+    /**
+     * Endpoint publico que emite el token. No exige autenticacion porque es el que la
+     * proporciona.
+     */
+    @PostMapping("/login")
+    LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        AuthenticateUser.Result result = authenticateUser.authenticate(
+                new AuthenticateUserCommand(request.email(), request.password()));
+
+        return LoginResponse.of(result.user(), result.token());
     }
 
     @PostMapping

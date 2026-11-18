@@ -1,6 +1,6 @@
 # 002 — Autenticación
 
-**Estado**: aprobada.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -77,7 +77,9 @@ POST /v1/users/login
 Content-Type: application/json
 ```
 
-Es público y no requiere token. Si la petición incluye `Authorization`, la cabecera se ignora.
+Es público y no requiere token. Una cabecera `Authorization` con un token válido no impide el
+login; un bearer inválido puede ser rechazado por el filtro de autenticación antes de llegar al
+endpoint.
 
 ### Petición
 
@@ -125,23 +127,23 @@ con formato desconocido se procesa como credencial inválida y devuelve `401`.
 
 | Estado | Tipo | Motivo |
 | --- | --- | --- |
-| `400` | `/problems/validation-error` | Falta un campo o está vacío |
-| `400` | `/problems/malformed-json` | El cuerpo no contiene JSON válido |
-| `401` | `/problems/invalid-credentials` | Correo inexistente o contraseña incorrecta |
+| `400` | `urn:meetroom:problem:validation-error` | Falta un campo o está vacío |
+| `400` | `urn:meetroom:problem:malformed-request` | El cuerpo no se puede interpretar |
+| `401` | `urn:meetroom:problem:invalid-credentials` | Correo inexistente o contraseña incorrecta |
 
 Ejemplo de validación:
 
 ```json
 {
-  "type": "/problems/validation-error",
-  "title": "Datos de autenticación inválidos",
+  "type": "urn:meetroom:problem:validation-error",
+  "title": "Bad Request",
   "status": 400,
-  "detail": "La contraseña es obligatoria",
+  "detail": "La petición contiene campos inválidos",
   "instance": "/v1/users/login",
   "errors": [
     {
       "field": "password",
-      "message": "La contraseña es obligatoria"
+      "message": "es obligatoria"
     }
   ]
 }
@@ -151,10 +153,10 @@ Ejemplo de credenciales inválidas:
 
 ```json
 {
-  "type": "/problems/invalid-credentials",
-  "title": "Credenciales inválidas",
+  "type": "urn:meetroom:problem:invalid-credentials",
+  "title": "Unauthorized",
   "status": 401,
-  "detail": "El correo o la contraseña no son correctos",
+  "detail": "Credenciales invalidas",
   "instance": "/v1/users/login"
 }
 ```
@@ -168,7 +170,8 @@ La respuesta no indica si el correo existe ni qué credencial ha fallado.
 - Si el correo no existe, se ejecuta una verificación BCrypt contra un hash señuelo constante.
 - Correo inexistente y contraseña incorrecta devuelven el mismo estado y cuerpo.
 - El token se firma con la misma clave utilizada para validarlo.
-- La contraseña, el hash y el cuerpo de login no se registran.
+- Las representaciones textuales del request y del comando omiten la contraseña. El logging HTTP
+  del cuerpo debe permanecer deshabilitado para garantizar que no se registre externamente.
 - Un token caducado no permite acceder a endpoints protegidos.
 
 ## 7. Configuración de seguridad
@@ -188,7 +191,8 @@ La respuesta no indica si el correo existe ni qué credencial ha fallado.
 | Campo obligatorio ausente | `400` |
 | Correo con formato inválido | `401` |
 | JSON mal formado | `400` |
-| Login con una cabecera `Authorization` | La cabecera se ignora |
+| Login con un token válido en `Authorization` | `200` si las credenciales son válidas |
+| Login con un bearer inválido en `Authorization` | Puede devolver `401` desde el filtro de seguridad |
 | Token de administrador usado en `POST /v1/users` | Operación autorizada |
 | Token de usuario usado en `POST /v1/users` | `403` |
 | Token caducado | `401` |
@@ -228,3 +232,8 @@ Se comprobarán:
 - No existe limitación de intentos ni bloqueo de cuentas.
 - Los cambios de rol no afectan a tokens ya emitidos.
 - Se utiliza una única clave simétrica sin rotación.
+- El decodificador valida firma y caducidad, pero no comprueba que `iss` sea `meetroom`.
+- `issuer` y `ttl-seconds` no tienen validación explícita; una configuración vacía, cero o
+  negativa puede impedir emitir tokens utilizables.
+- La ausencia de logging del cuerpo depende también de mantener deshabilitado cualquier mecanismo
+  externo de registro de peticiones HTTP.
