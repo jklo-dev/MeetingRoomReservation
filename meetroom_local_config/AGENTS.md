@@ -38,13 +38,13 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 ## Estado actual
 
 **[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación, 003 de
-creación de salas y 004 de listado de salas están implementadas.
+creación de salas, 004 de listado de salas y 005 de creación de reservas están implementadas.
 
 Actualmente existen el dominio de usuarios, los casos de uso de creación y autenticación,
 adaptadores web, JPA y JWT, migraciones Flyway, validación y emisión de tokens, manejo centralizado
 de errores y pruebas de dominio, web e integración con PostgreSQL mediante Testcontainers.
-También existe el dominio de salas, su caso de uso de creación, adaptadores web y JPA y la
-migración `V3__create_rooms_table.sql`.
+También existen los dominios de salas y reservas, sus casos de uso implementados, adaptadores web
+y JPA y las migraciones hasta `V4__create_reservations_table.sql`.
 
 ## Tecnologías verificadas
 
@@ -108,7 +108,7 @@ Los modelos, restricciones, índices, datos temporales y estrategia de cancelaci
 en sus especificaciones.
 
 La creación de reservas combina comprobación explícita de solapamiento, cerrojo pesimista por
-sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máximo 5 segundos.
+sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máximo 30 segundos.
 
 ## API
 
@@ -223,7 +223,7 @@ Funcionalidades definidas:
 - `003-creacion-salas`: creación de salas por administradores; implementada.
 - `004-listado-salas`: listado público de salas con filtros, ordenación y paginación;
   implementada.
-- `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; aprobada.
+- `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; implementada.
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
   aprobada.
 - `007-listado-reservas`: listado público con filtros, ordenación y paginación; aprobada.

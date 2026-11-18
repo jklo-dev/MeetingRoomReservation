@@ -27,17 +27,21 @@ public final class TestJwtFactory {
     }
 
     public static String tokenFor(UUID userId, String role) {
-        return token(userId, role, Instant.now().plusSeconds(3600));
+        return token(userId.toString(), role, Instant.now().plusSeconds(3600));
+    }
+
+    public static String tokenForSubject(String subject, String role) {
+        return token(subject, role, Instant.now().plusSeconds(3600));
     }
 
     public static String expiredTokenFor(UUID userId, String role) {
-        return token(userId, role, Instant.now().minusSeconds(60));
+        return token(userId.toString(), role, Instant.now().minusSeconds(60));
     }
 
-    private static String token(UUID userId, String role, Instant expiration) {
+    private static String token(String subject, String role, Instant expiration) {
         try {
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .subject(userId.toString())
+                    .subject(subject)
                     .claim("role", role)
                     .issuer("meetroom")
                     .issueTime(Date.from(Instant.now().minusSeconds(5)))

@@ -154,7 +154,8 @@ class RoomControllerTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.type")
-                        .value("urn:meetroom:problem:malformed-request"));
+                        .value("urn:meetroom:problem:validation-error"))
+                .andExpect(jsonPath("$.errors[0].field").value("capacity"));
     }
 
     @Test

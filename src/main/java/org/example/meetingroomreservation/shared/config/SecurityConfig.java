@@ -71,6 +71,9 @@ public class SecurityConfig {
                         // Por el requisito 5 de la prueba, los endpoints de consulta son
                         // publicos.
                         .requestMatchers(HttpMethod.GET, "/v1/rooms").permitAll()
+                        // Requiere autenticacion pero ningun rol concreto: cualquier usuario
+                        // autenticado puede reservar.
+                        .requestMatchers(HttpMethod.POST, "/v1/reservations").authenticated()
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
                         .anyRequest().denyAll())

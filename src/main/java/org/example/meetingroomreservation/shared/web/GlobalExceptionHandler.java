@@ -3,7 +3,11 @@ package org.example.meetingroomreservation.shared.web;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import tools.jackson.core.JacksonException;
+
+import org.example.meetingroomreservation.reservation.domain.exception.ReservationExceptions;
 import org.example.meetingroomreservation.room.domain.exception.RoomNameAlreadyExistsException;
 import org.example.meetingroomreservation.user.domain.exception.EmailAlreadyExistsException;
 import org.example.meetingroomreservation.user.domain.exception.InvalidCredentialsException;
@@ -73,15 +77,59 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * JSON sintacticamente invalido, cuerpo ausente, o un valor que no encaja con el tipo
-     * destino, como un rol fuera del enumerado. En estos casos Jackson falla antes de poder
-     * atribuir el fallo a un campo, asi que no se devuelve el array de errores.
+     * Cuerpo que Jackson no puede deserializar.
+     *
+     * <p>Se distinguen dos situaciones, porque no son el mismo problema:
+     *
+     * <ul>
+     *   <li><b>El campo se puede identificar</b> —una fecha sin offset, un UUID mal formado, un
+     *       texto donde se espera un entero, un valor fuera de un enumerado—: es un error de
+     *       validacion de ese campo, asi que se devuelve {@code validation-error} con el array
+     *       {@code errors}, igual que la validacion declarativa.</li>
+     *   <li><b>El campo no se puede identificar</b> —JSON sintacticamente roto o cuerpo
+     *       ausente—: entonces si corresponde {@code malformed-request}, que el catalogo define
+     *       justamente como el caso que no permite atribuir el fallo a un campo.</li>
+     * </ul>
+     *
+     * <p>Diferencia con {@code MethodArgumentNotValidException}: alli se acumulan **todos** los
+     * campos invalidos, porque Bean Validation recorre el objeto ya construido. Aqui Jackson
+     * aborta en el primer campo que no puede convertir, asi que el array lleva una sola entrada.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ProblemDetail handleUnreadable(HttpMessageNotReadableException e, WebRequest request) {
-        return problem(HttpStatus.BAD_REQUEST,
-                "El cuerpo de la peticion no se puede interpretar",
-                ProblemTypes.MALFORMED_REQUEST, request);
+        return campoCulpable(e)
+                .map(campo -> {
+                    ProblemDetail problem = problem(HttpStatus.BAD_REQUEST,
+                            "La peticion contiene campos invalidos",
+                            ProblemTypes.VALIDATION_ERROR, request);
+                    problem.setProperty("errors", List.of(new FieldErrorDetail(campo,
+                            "no tiene un formato valido")));
+                    return problem;
+                })
+                .orElseGet(() -> problem(HttpStatus.BAD_REQUEST,
+                        "El cuerpo de la peticion no se puede interpretar",
+                        ProblemTypes.MALFORMED_REQUEST, request));
+    }
+
+    /**
+     * Extrae de la excepcion de Jackson el nombre del campo que no pudo deserializarse.
+     *
+     * <p>Recorre la cadena de causas buscando una {@code JacksonException}, cuyo {@code getPath()}
+     * describe la ruta hasta el campo. Se toma el ultimo tramo con nombre: en estructuras
+     * anidadas, es el campo concreto que falla y no el objeto que lo contiene.
+     */
+    private Optional<String> campoCulpable(Throwable e) {
+        Throwable causa = e;
+        while (causa != null) {
+            if (causa instanceof JacksonException jackson) {
+                return jackson.getPath().stream()
+                        .map(JacksonException.Reference::getPropertyName)
+                        .filter(nombre -> nombre != null && !nombre.isBlank())
+                        .reduce((primero, ultimo) -> ultimo);
+            }
+            causa = causa.getCause();
+        }
+        return Optional.empty();
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -94,6 +142,71 @@ public class GlobalExceptionHandler {
     ProblemDetail handleRoomNameExists(RoomNameAlreadyExistsException e, WebRequest request) {
         return problem(HttpStatus.CONFLICT, e.getMessage(),
                 ProblemTypes.ROOM_NAME_ALREADY_EXISTS, request);
+    }
+
+    // --- Reservas: cada causa con su propio tipo, aunque compartan codigo HTTP ---
+
+    @ExceptionHandler(ReservationExceptions.InvalidAuthenticatedUser.class)
+    ProblemDetail handleInvalidAuthenticatedUser(
+            ReservationExceptions.InvalidAuthenticatedUser e, WebRequest request) {
+        return problem(HttpStatus.UNAUTHORIZED, e.getMessage(),
+                ProblemTypes.AUTHENTICATION_REQUIRED, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.InvalidTimeRange.class)
+    ProblemDetail handleInvalidTimeRange(ReservationExceptions.InvalidTimeRange e,
+                                         WebRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, e.getMessage(), ProblemTypes.INVALID_TIME_RANGE,
+                request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.MustEndInFuture.class)
+    ProblemDetail handleMustEndInFuture(ReservationExceptions.MustEndInFuture e,
+                                        WebRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, e.getMessage(),
+                ProblemTypes.RESERVATION_MUST_END_IN_FUTURE, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.DurationOutOfRange.class)
+    ProblemDetail handleDurationOutOfRange(ReservationExceptions.DurationOutOfRange e,
+                                           WebRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, e.getMessage(),
+                ProblemTypes.RESERVATION_DURATION_OUT_OF_RANGE, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.AttendeesExceedCapacity.class)
+    ProblemDetail handleAttendeesExceedCapacity(ReservationExceptions.AttendeesExceedCapacity e,
+                                                WebRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, e.getMessage(),
+                ProblemTypes.ATTENDEES_EXCEED_CAPACITY, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.RoomNotFound.class)
+    ProblemDetail handleRoomNotFound(ReservationExceptions.RoomNotFound e, WebRequest request) {
+        return problem(HttpStatus.NOT_FOUND, e.getMessage(), ProblemTypes.ROOM_NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.RoomNotAvailable.class)
+    ProblemDetail handleRoomNotAvailable(ReservationExceptions.RoomNotAvailable e,
+                                         WebRequest request) {
+        return problem(HttpStatus.CONFLICT, e.getMessage(), ProblemTypes.ROOM_NOT_AVAILABLE,
+                request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.Overlap.class)
+    ProblemDetail handleOverlap(ReservationExceptions.Overlap e, WebRequest request) {
+        return problem(HttpStatus.CONFLICT, e.getMessage(), ProblemTypes.RESERVATION_OVERLAP,
+                request);
+    }
+
+    /**
+     * Fallo transitorio, de ahi el 503 y no un 409: la peticion es valida y reintentarla tiene
+     * sentido.
+     */
+    @ExceptionHandler(ReservationExceptions.RoomBusy.class)
+    ProblemDetail handleRoomBusy(ReservationExceptions.RoomBusy e, WebRequest request) {
+        return problem(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage(), ProblemTypes.ROOM_BUSY,
+                request);
     }
 
     /**

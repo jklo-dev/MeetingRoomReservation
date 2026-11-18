@@ -1,6 +1,6 @@
 # 005 — Creación de reservas
 
-**Estado**: aprobada.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -197,7 +197,7 @@ bloquean entre sí.
 La restricción de exclusión garantiza que tampoco puedan introducirse solapamientos mediante otra
 instancia, scripts o accesos directos a la base de datos.
 
-Si el cerrojo no se obtiene en 5 segundos, se devuelve `503 room-busy`.
+Si el cerrojo no se obtiene en 30 segundos, se devuelve `503 room-busy`.
 
 Toda la lectura de la sala, comprobación de solapamiento e inserción ocurre en una sola transacción
 con aislamiento `READ COMMITTED`.
@@ -208,17 +208,17 @@ Todas las respuestas utilizan `application/problem+json`.
 
 | Estado | Tipo | Causa |
 | --- | --- | --- |
-| `400` | `/problems/validation-error` | Formato o campos inválidos |
-| `400` | `/problems/malformed-json` | JSON inválido |
-| `400` | `/problems/invalid-time-range` | Fin no posterior al inicio |
-| `400` | `/problems/reservation-must-end-in-future` | Fin no posterior al momento actual |
-| `400` | `/problems/reservation-duration-out-of-range` | Duración fuera del rango permitido |
-| `400` | `/problems/attendees-exceed-capacity` | Demasiados asistentes |
-| `401` | `/problems/authentication-required` | Token ausente o inválido |
-| `404` | `/problems/room-not-found` | Sala inexistente |
-| `409` | `/problems/room-not-available` | Sala inactiva |
-| `409` | `/problems/reservation-overlap` | Horario ocupado |
-| `503` | `/problems/room-busy` | Cerrojo no obtenido en 5 segundos |
+| `400` | `urn:meetroom:problem:validation-error` | Formato o campos inválidos |
+| `400` | `urn:meetroom:problem:malformed-request` | JSON inválido |
+| `400` | `urn:meetroom:problem:invalid-time-range` | Fin no posterior al inicio |
+| `400` | `urn:meetroom:problem:reservation-must-end-in-future` | Fin no posterior al momento actual |
+| `400` | `urn:meetroom:problem:reservation-duration-out-of-range` | Duración fuera del rango permitido |
+| `400` | `urn:meetroom:problem:attendees-exceed-capacity` | Demasiados asistentes |
+| `401` | `urn:meetroom:problem:authentication-required` | Token ausente, inválido o sin usuario existente |
+| `404` | `urn:meetroom:problem:room-not-found` | Sala inexistente |
+| `409` | `urn:meetroom:problem:room-not-available` | Sala inactiva |
+| `409` | `urn:meetroom:problem:reservation-overlap` | Horario ocupado |
+| `503` | `urn:meetroom:problem:room-busy` | Cerrojo no obtenido en 30 segundos |
 
 Solo `validation-error` incluye el array `errors`.
 
@@ -231,7 +231,7 @@ Ejemplo:
 
 ```json
 {
-  "type": "/problems/reservation-overlap",
+  "type": "urn:meetroom:problem:reservation-overlap",
   "title": "Horario no disponible",
   "status": 409,
   "detail": "La sala ya tiene una reserva activa en el horario indicado",

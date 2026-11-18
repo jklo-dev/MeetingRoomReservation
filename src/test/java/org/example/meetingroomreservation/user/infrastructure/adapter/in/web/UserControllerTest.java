@@ -126,7 +126,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("400 malformed-request cuando el rol no esta en el enumerado")
+    @DisplayName("400 validation-error cuando el rol no esta en el enumerado, nombrando el campo")
     void rechazaRolInvalido() throws Exception {
         String bodyRolInvalido = BODY_VALIDO.replace("\"USER\"", "\"SUPERADMIN\"");
 
@@ -136,7 +136,8 @@ class UserControllerTest {
                         .content(bodyRolInvalido))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.type")
-                        .value("urn:meetroom:problem:malformed-request"));
+                        .value("urn:meetroom:problem:validation-error"))
+                .andExpect(jsonPath("$.errors[0].field").value("role"));
     }
 
     @Test

@@ -25,6 +25,19 @@ public final class ProblemTypes {
     public static final URI ROOM_NAME_ALREADY_EXISTS =
             URI.create(PREFIX + "room-name-already-exists");
 
+    // Reservas
+    public static final URI INVALID_TIME_RANGE = URI.create(PREFIX + "invalid-time-range");
+    public static final URI RESERVATION_MUST_END_IN_FUTURE =
+            URI.create(PREFIX + "reservation-must-end-in-future");
+    public static final URI RESERVATION_DURATION_OUT_OF_RANGE =
+            URI.create(PREFIX + "reservation-duration-out-of-range");
+    public static final URI ATTENDEES_EXCEED_CAPACITY =
+            URI.create(PREFIX + "attendees-exceed-capacity");
+    public static final URI ROOM_NOT_FOUND = URI.create(PREFIX + "room-not-found");
+    public static final URI ROOM_NOT_AVAILABLE = URI.create(PREFIX + "room-not-available");
+    public static final URI RESERVATION_OVERLAP = URI.create(PREFIX + "reservation-overlap");
+    public static final URI ROOM_BUSY = URI.create(PREFIX + "room-busy");
+
     private ProblemTypes() {
     }
 }
