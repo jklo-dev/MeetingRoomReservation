@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 class RoomJpaAdapter implements RoomRepositoryPort {
 
+    private static final String NAME_UNIQUE_CONSTRAINT = "rooms_name_unique_ci";
+
     private final RoomJpaRepository repository;
 
     RoomJpaAdapter(RoomJpaRepository repository) {
@@ -66,12 +68,24 @@ class RoomJpaAdapter implements RoomRepositoryPort {
     @Override
     public Room save(Room room) {
         try {
-            return repository.save(RoomJpaEntity.fromDomain(room)).toDomain();
+            return repository.saveAndFlush(RoomJpaEntity.fromDomain(room)).toDomain();
         } catch (DataIntegrityViolationException e) {
-            // La comprobacion previa no cierra la ventana entre dos peticiones simultaneas con
-            // el mismo nombre: el indice unico es quien decide, y su violacion se traduce a la
-            // misma excepcion de dominio para que el cliente reciba un 409.
-            throw new RoomNameAlreadyExistsException();
+            if (isNameUniqueViolation(e)) {
+                throw new RoomNameAlreadyExistsException();
+            }
+            throw e;
         }
+    }
+
+    private boolean isNameUniqueViolation(DataIntegrityViolationException e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (cause.getMessage() != null
+                    && cause.getMessage().contains(NAME_UNIQUE_CONSTRAINT)) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
