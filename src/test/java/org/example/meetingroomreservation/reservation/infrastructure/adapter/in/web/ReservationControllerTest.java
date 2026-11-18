@@ -67,6 +67,9 @@ class ReservationControllerTest {
     @MockitoBean
     private org.example.meetingroomreservation.reservation.domain.port.in.CancelReservation cancelReservation;
 
+    @MockitoBean
+    private org.example.meetingroomreservation.reservation.domain.port.in.ListReservations listReservations;
+
     private String tokenDeUsuario() {
         return TestJwtFactory.tokenFor(USUARIO, "USER");
     }

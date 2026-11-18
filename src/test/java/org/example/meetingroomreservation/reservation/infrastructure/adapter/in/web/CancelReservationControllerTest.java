@@ -60,6 +60,9 @@ class CancelReservationControllerTest {
     @MockitoBean
     private CreateReservation createReservation;
 
+    @MockitoBean
+    private org.example.meetingroomreservation.reservation.domain.port.in.ListReservations listReservations;
+
     private void devuelveCancelada() {
         Reservation cancelada = Reservation.restore(RESERVA, SALA, PROPIETARIO,
                 new TimeRange(

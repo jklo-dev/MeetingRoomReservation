@@ -64,6 +64,14 @@ class CancelReservationServiceTest {
             guardadas.add(reservation);
             return reservation;
         }
+
+        @Override
+        public org.example.meetingroomreservation.shared.domain.PageResult<
+                org.example.meetingroomreservation.reservation.domain.model.ReservationDetail>
+                search(org.example.meetingroomreservation.reservation.domain.port.in
+                        .ListReservationsQuery query) {
+            throw new UnsupportedOperationException("no se usa en este test");
+        }
     }
 
     private static final class FakeRooms implements RoomCalendarPort {
