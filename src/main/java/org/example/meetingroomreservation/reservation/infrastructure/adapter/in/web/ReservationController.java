@@ -5,17 +5,23 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.example.meetingroomreservation.reservation.domain.model.ReservationDetail;
 import org.example.meetingroomreservation.reservation.domain.model.Requester;
 import org.example.meetingroomreservation.reservation.domain.port.in.CancelReservation;
 import org.example.meetingroomreservation.reservation.domain.port.in.CreateReservation;
 import org.example.meetingroomreservation.reservation.domain.port.in.CreateReservationCommand;
+import org.example.meetingroomreservation.reservation.domain.port.in.ListReservations;
+import org.example.meetingroomreservation.shared.domain.PageResult;
+import org.example.meetingroomreservation.shared.web.PageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -34,11 +40,38 @@ class ReservationController {
 
     private final CreateReservation createReservation;
     private final CancelReservation cancelReservation;
+    private final ListReservations listReservations;
 
     ReservationController(CreateReservation createReservation,
-                          CancelReservation cancelReservation) {
+                          CancelReservation cancelReservation,
+                          ListReservations listReservations) {
         this.createReservation = createReservation;
         this.cancelReservation = cancelReservation;
+        this.listReservations = listReservations;
+    }
+
+    /**
+     * Listado publico. Por el requisito 5 de la prueba, los endpoints de consulta no requieren
+     * autenticacion.
+     */
+    @GetMapping
+    PageResponse<ReservationResponse> list(
+            @RequestParam(required = false) String roomId,
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String direction,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+
+        ListReservationsParams params = new ListReservationsParams(
+                roomId, ownerId, status, from, to, direction, page, size);
+
+        PageResult<ReservationDetail> result = listReservations.list(params.toQuery());
+
+        return PageResponse.from(result, detalle -> ReservationResponse.of(
+                detalle.reservation(), detalle.room(), detalle.owner()));
     }
 
     /**

@@ -38,8 +38,8 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 ## Estado actual
 
 **[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación, 003 de
-creación de salas, 004 de listado de salas, 005 de creación de reservas y 006 de cancelación de
-reservas están implementadas.
+creación de salas, 004 de listado de salas, 005 de creación de reservas, 006 de cancelación de
+reservas y 007 de listado de reservas están implementadas.
 
 Actualmente existen el dominio de usuarios, los casos de uso de creación y autenticación,
 adaptadores web, JPA y JWT, migraciones Flyway, validación y emisión de tokens, manejo centralizado
@@ -140,9 +140,9 @@ administrador. Conserva la reserva y registra quién y cuándo canceló.
 
 **[Decidido]** La cancelación usa un bloqueo de fila con espera máxima de 30 segundos.
 
-`GET /v1/reservations` es público y admite filtros acumulativos por sala, responsable, estado y
-rango temporal. El rango usa semántica semiabierta; el resultado se ordena por inicio y está
-paginado.
+**[Verificado]** `GET /v1/reservations` es público y admite filtros acumulativos por sala,
+responsable, estado y rango temporal. El rango usa semántica semiabierta; el resultado se ordena
+por inicio y está paginado. Un bearer inválido o caducado devuelve `401`.
 
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
@@ -228,4 +228,4 @@ Funcionalidades definidas:
 - `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; implementada.
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
   implementada.
-- `007-listado-reservas`: listado público con filtros, ordenación y paginación; aprobada.
+- `007-listado-reservas`: listado público con filtros, ordenación y paginación; implementada.

@@ -1,6 +1,6 @@
 # 007 — Listado de reservas
 
-**Estado**: aprobada.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -35,7 +35,7 @@ No incluye consulta individual, mutaciones, cálculo de disponibilidad, estadís
 GET /v1/reservations
 ```
 
-Es público. Si se envía una cabecera `Authorization`, no se evalúa.
+Es público y no requiere autenticación. Si se envía un bearer inválido o caducado, devuelve `401`.
 
 ### Parámetros
 
@@ -140,25 +140,25 @@ Los parámetros inválidos devuelven `400` con `application/problem+json`.
 
 | Tipo | Motivo |
 | --- | --- |
-| `/problems/invalid-query-parameter` | Uno o más parámetros no cumplen sus reglas |
+| `urn:meetroom:problem:validation-error` | Un parámetro no cumple sus reglas |
 
 ```json
 {
-  "type": "/problems/invalid-query-parameter",
-  "title": "Parámetros de consulta inválidos",
+  "type": "urn:meetroom:problem:validation-error",
+  "title": "Bad Request",
   "status": 400,
-  "detail": "El parámetro to debe ser posterior a from",
+  "detail": "La petición contiene parámetros inválidos",
   "instance": "/v1/reservations",
   "errors": [
     {
       "field": "to",
-      "message": "Debe ser posterior a from"
+      "message": "debe ser posterior a from"
     }
   ]
 }
 ```
 
-El endpoint no devuelve `401`, `403` ni `404`.
+El endpoint no devuelve `403` ni `404`. Un bearer inválido o caducado devuelve `401`.
 
 Un `roomId` u `ownerId` válido pero inexistente devuelve `200` con contenido vacío.
 
@@ -173,7 +173,7 @@ Un `roomId` u `ownerId` válido pero inexistente devuelve `200` con contenido va
 - Toda ordenación usa `id` como desempate.
 - Una página fuera de rango devuelve `200` con contenido vacío.
 - El filtro de responsable utiliza `ownerId`, no nombre.
-- El endpoint no procesa tokens.
+- El endpoint no requiere token; un bearer inválido o caducado se rechaza con `401`.
 
 ## 8. Casos relevantes
 
@@ -193,7 +193,8 @@ Un `roomId` u `ownerId` válido pero inexistente devuelve `200` con contenido va
 | Página negativa o tamaño `0` | `400` |
 | Página fuera de rango | `200` vacío |
 | Tamaño muy grande | Se acepta |
-| Token válido o caducado | Se ignora |
+| Token válido | No modifica el resultado |
+| Token inválido o caducado | `401` |
 | Parámetro desconocido | Se ignora |
 
 ## 9. Diseño
@@ -201,7 +202,7 @@ Un `roomId` u `ownerId` válido pero inexistente devuelve `200` con contenido va
 - Reutiliza los tipos de paginación de `004 — Listado de salas`.
 - El dominio recibe filtros y paginación mediante tipos propios.
 - La infraestructura traduce esos criterios a persistencia.
-- Los filtros opcionales utilizan `Specification`.
+- Los filtros opcionales se traducen a SQL nativo parametrizado.
 - Sala y responsable se cargan en la misma consulta para evitar N+1.
 - No se añaden índices nuevos.
 
@@ -235,6 +236,8 @@ Se comprobarán:
 - Parámetros inválidos.
 - Identificadores inexistentes.
 - Número de consultas para detectar N+1.
+
+No existen todavía pruebas específicas de esta funcionalidad.
 
 ## 12. Limitaciones conocidas
 

@@ -79,6 +79,7 @@ public class SecurityConfig {
                         // conoce tras consultarla. La autorizacion se resuelve en el caso de uso.
                         .requestMatchers(HttpMethod.POST, "/v1/reservations/*/cancel")
                         .authenticated()
+                        .requestMatchers(HttpMethod.GET, "/v1/reservations").permitAll()
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
                         .anyRequest().denyAll())
