@@ -18,6 +18,20 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Solo el endpoint de salud. Actuator ya expone unicamente health e info por defecto,
+        # pero declararlo evita que una version futura o una dependencia nueva expongan algo mas
+        # sin que nadie lo note.
+        include: health
+  endpoint:
+    health:
+      # Sin detalle por componente: el endpoint es publico y el detalle revelaria el motor de
+      # base de datos, su version y el estado de las migraciones a cualquiera que pregunte.
+      show-details: never
+
 meetroom:
   security:
     jwt:

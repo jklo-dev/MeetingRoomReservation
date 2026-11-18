@@ -39,7 +39,7 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 
 **[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación, 003 de
 creación de salas, 004 de listado de salas, 005 de creación de reservas, 006 de cancelación de
-reservas y 007 de listado de reservas están implementadas.
+reservas, 007 de listado de reservas y 008 de endpoint de salud están implementadas.
 
 Actualmente existen el dominio de usuarios, los casos de uso de creación y autenticación,
 adaptadores web, JPA y JWT, migraciones Flyway, validación y emisión de tokens, manejo centralizado
@@ -144,6 +144,9 @@ administrador. Conserva la reserva y registra quién y cuándo canceló.
 responsable, estado y rango temporal. El rango usa semántica semiabierta; el resultado se ordena
 por inicio y está paginado. Un bearer inválido o caducado devuelve `401`.
 
+**[Verificado]** `GET /actuator/health` es público y comprueba el estado de la aplicación y su
+acceso a la base de datos. Solo expone el estado global, sin detalles de componentes.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -174,7 +177,8 @@ Las reglas específicas de cada endpoint se definen en su especificación.
 ## Configuración
 
 **[Verificado]** `application.yaml` configura el datasource PostgreSQL, JPA en modo `validate`,
-Flyway y las propiedades de JWT.
+Flyway, las propiedades de JWT y Actuator. Solo se expone el endpoint `health` y sus detalles de
+componentes permanecen ocultos.
 
 **[Decidido]**
 
@@ -229,3 +233,4 @@ Funcionalidades definidas:
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
   implementada.
 - `007-listado-reservas`: listado público con filtros, ordenación y paginación; implementada.
+- `008-health-check`: endpoint público de salud mediante Actuator; implementada.
