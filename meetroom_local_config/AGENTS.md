@@ -137,6 +137,7 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Roles `USER` y `ADMIN`.
 - Login público mediante `POST /v1/users/login`.
 - Creación de usuarios mediante `POST /v1/users`, restringida a `ADMIN`.
+- Creación de salas mediante `POST /v1/rooms`, restringida a `ADMIN`.
 - Tokens con vigencia de 24 horas y claims `sub`, `role`, `iat`, `exp` e `iss`.
 - El emisor del token es `meetroom`.
 - No se incluyen renovación ni revocación de tokens.
@@ -195,8 +196,8 @@ Funcionalidades definidas:
 
 - `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT.
 - `002-autenticacion`: login y emisión de tokens JWT.
+- `003-creacion-salas`: creación de salas por administradores.
 
 Funcionalidades previstas:
 
-- `003`: gestión de salas.
 - `004`: reservas.
