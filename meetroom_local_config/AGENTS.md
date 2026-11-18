@@ -37,18 +37,11 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 
 ## Estado actual
 
-**[Verificado]** El proyecto parte de una aplicación generada con Spring Initializr y todavía no
-contiene lógica de negocio.
+**[Verificado]** La funcionalidad 001 de creación de usuarios está implementada.
 
-Actualmente existen:
-
-- Aplicación base de Spring Boot.
-- Configuración mínima en `application.yaml`.
-- Prueba de carga del contexto.
-- Configuración de PostgreSQL mediante Testcontainers para desarrollo y pruebas.
-
-No existen todavía controladores, modelos de dominio, repositorios, migraciones ni configuración
-de seguridad.
+Actualmente existen el dominio de usuarios, el caso de uso de creación, adaptadores web y JPA,
+migraciones Flyway, validación JWT, manejo centralizado de errores y pruebas de dominio, web e
+integración con PostgreSQL mediante Testcontainers.
 
 ## Tecnologías verificadas
 
@@ -116,7 +109,7 @@ sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máx
 
 ## API
 
-**[Verificado]** No hay endpoints implementados.
+**[Verificado]** `POST /v1/users` crea usuarios y requiere un JWT con rol `ADMIN`.
 
 **[Decidido]** La API cubrirá:
 
@@ -172,14 +165,16 @@ Las reglas específicas de cada endpoint se definen en su especificación.
 
 ## Configuración
 
-**[Verificado]** `application.yaml` solo contiene actualmente el nombre de la aplicación.
+**[Verificado]** `application.yaml` configura el datasource PostgreSQL, JPA en modo `validate`,
+Flyway y las propiedades de JWT.
 
 **[Decidido]**
 
 - Credenciales y secretos se proporcionan mediante variables de entorno o propiedades externas.
 - No se almacenan secretos reales en el repositorio.
 
-Los perfiles, nombres de variables y configuración local se decidirán cuando se implementen.
+Variables externas utilizadas: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` y
+`JWT_SECRET`.
 
 ## Comandos
 
@@ -216,8 +211,8 @@ meetroom_local_config/specs/NNN-nombre-funcionalidad/
 
 Funcionalidades definidas:
 
-- `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT; pendiente
-  de aprobación.
+- `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT;
+  implementada.
 - `002-autenticacion`: login y emisión de tokens JWT; aprobada.
 - `003-creacion-salas`: creación de salas por administradores; pendiente de aprobación.
 - `004-listado-salas`: listado público de salas con filtros, ordenación y paginación; aprobada.

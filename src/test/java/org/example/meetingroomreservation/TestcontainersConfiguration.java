@@ -7,7 +7,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+// Publica porque los tests de integracion de cada modulo la importan desde su propio paquete.
+public class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection

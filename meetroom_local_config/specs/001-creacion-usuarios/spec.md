@@ -1,8 +1,6 @@
 # 001 — Creación de usuarios
 
-**Estado**: pendiente de aprobación.
-
-Las decisiones marcadas como **[Propuesta]** requieren aprobación.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -44,7 +42,7 @@ Cada usuario contiene:
 | `firstName` | Obligatorio, máximo 100 caracteres |
 | `lastName` | Obligatorio, máximo 100 caracteres |
 | `role` | `USER` o `ADMIN` |
-| `createdAt` | Instante de creación en UTC |
+| `createdAt` | Instante de creación con offset |
 
 El correo se normaliza eliminando espacios exteriores y convirtiéndolo a minúsculas.
 
@@ -52,13 +50,13 @@ Nombre y apellido eliminan espacios exteriores. Los espacios interiores se conse
 
 ## 4. Persistencia
 
-**[Propuesta]** Tabla `users`:
+Tabla `users`:
 
 | Columna | Tipo | Restricciones |
 | --- | --- | --- |
 | `id` | `uuid` | Clave primaria |
 | `email` | `varchar(255)` | No nulo y único |
-| `password_hash` | `varchar(255)` | No nulo |
+| `password_hash` | `varchar(60)` | No nulo |
 | `first_name` | `varchar(100)` | No nulo |
 | `last_name` | `varchar(100)` | No nulo |
 | `role` | `varchar(20)` | No nulo; `USER` o `ADMIN` |
@@ -66,10 +64,10 @@ Nombre y apellido eliminan espacios exteriores. Los espacios interiores se conse
 
 Las migraciones crean la tabla y el usuario administrador inicial.
 
-**[Propuesta]** Usuario inicial:
+Usuario inicial:
 
 - Correo: `admin@meetroom.local`
-- Contraseña: pendiente de definir.
+- Contraseña: `admin`.
 - Nombre: `Admin`
 - Apellido: `Sistema`
 - Rol: `ADMIN`
@@ -102,10 +100,10 @@ Validaciones:
 
 - Todos los campos son obligatorios.
 - El correo debe tener formato válido.
-- La contraseña debe tener entre **[Pendiente]** y 72 bytes en UTF-8.
+- La contraseña debe tener entre 4 y 72 caracteres.
 - Nombre y apellido no pueden quedar vacíos después de recortarlos.
 - El rol distingue mayúsculas y debe ser `USER` o `ADMIN`.
-- Los campos JSON desconocidos **[Propuesta]** se rechazan.
+- Los campos JSON desconocidos se ignoran.
 
 ### Respuesta satisfactoria
 
@@ -131,12 +129,11 @@ La contraseña y el hash nunca se incluyen en la respuesta.
 
 | Estado | Tipo | Motivo |
 | --- | --- | --- |
-| `400` | `/problems/validation-error` | Uno o más campos no cumplen sus reglas |
-| `400` | `/problems/malformed-json` | El cuerpo no contiene JSON válido |
-| `400` | `/problems/unknown-field` | El cuerpo contiene un campo no admitido |
-| `401` | `/problems/authentication-required` | Falta el token o no es válido |
-| `403` | `/problems/insufficient-permissions` | El usuario no tiene rol `ADMIN` |
-| `409` | `/problems/user-email-conflict` | Ya existe el correo normalizado |
+| `400` | `urn:meetroom:problem:validation-error` | Uno o más campos no cumplen sus reglas |
+| `400` | `urn:meetroom:problem:malformed-request` | El cuerpo no se puede interpretar |
+| `401` | `urn:meetroom:problem:authentication-required` | Falta el token o no es válido |
+| `403` | `urn:meetroom:problem:insufficient-role` | El usuario no tiene rol `ADMIN` |
+| `409` | `urn:meetroom:problem:email-already-exists` | Ya existe el correo normalizado |
 
 Los errores usan `application/problem+json`. `type` identifica el problema concreto y `detail`
 explica la causa específica de esa respuesta.
@@ -145,19 +142,19 @@ Ejemplo de validación:
 
 ```json
 {
-  "type": "/problems/validation-error",
-  "title": "Datos de usuario inválidos",
+  "type": "urn:meetroom:problem:validation-error",
+  "title": "Bad Request",
   "status": 400,
-  "detail": "La petición contiene 2 campos inválidos",
+  "detail": "La petición contiene campos inválidos",
   "instance": "/v1/users",
   "errors": [
     {
       "field": "email",
-      "message": "El correo debe tener un formato válido"
+      "message": "debe ser una dirección de correo válida"
     },
     {
       "field": "firstName",
-      "message": "El nombre es obligatorio"
+      "message": "es obligatorio"
     }
   ]
 }
@@ -170,7 +167,7 @@ un `title` y un `detail` específicos.
 ## 6. Seguridad
 
 - JWT firmado con HS256.
-- La clave se obtiene de configuración externa.
+- La clave se obtiene de configuración externa y debe tener al menos 32 bytes.
 - El rol se obtiene del claim `role`.
 - El claim debe contener exactamente `USER` o `ADMIN`.
 - Un token sin un rol válido no autoriza la operación.
@@ -182,7 +179,7 @@ un `title` y un `detail` específicos.
 - La unicidad del correo se garantiza en el dominio y en la base de datos.
 - Dos creaciones simultáneas con el mismo correo producen un `201` y un `409`.
 - El identificador se genera en la aplicación.
-- `createdAt` se genera y devuelve en UTC.
+- `createdAt` se genera mediante un reloj inyectado y conserva su offset.
 - El dominio no depende de Spring ni de JPA.
 
 ## 8. Criterios de aceptación
@@ -190,7 +187,7 @@ un `title` y un `detail` específicos.
 - Un administrador puede crear un usuario y recibe `201`, `Location` y el cuerpo definido.
 - El correo queda almacenado normalizado.
 - La contraseña queda almacenada como hash BCrypt.
-- Un correo duplicado devuelve `409` con el tipo `/problems/user-email-conflict`.
+- Un correo duplicado devuelve `409` con el tipo `urn:meetroom:problem:email-already-exists`.
 - Cada error devuelve un tipo y un detalle que describen su causa concreta.
 - Una petición con campos inválidos devuelve `400` y un mensaje por cada campo afectado.
 - La ausencia de token devuelve `401`.
@@ -200,18 +197,16 @@ un `title` y un `detail` específicos.
 
 ## 9. Pruebas
 
-Se comprobarán:
+Se comprueban:
 
 - Normalización y validaciones del dominio.
 - Hasheado de la contraseña.
 - Creación satisfactoria.
-- Correo duplicado, incluida concurrencia.
+- Correo duplicado.
 - Tipos, detalles y mensajes específicos de cada error.
 - Respuestas `400`, `401`, `403` y `409`.
 - Aplicación de migraciones con PostgreSQL.
 
 ## 10. Decisiones pendientes
 
-- Longitud mínima de la contraseña.
-- Contraseña o mecanismo de configuración del administrador inicial.
-- Confirmar si los campos JSON desconocidos se rechazan.
+No quedan decisiones pendientes para esta funcionalidad.
