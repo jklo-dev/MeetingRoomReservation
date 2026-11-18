@@ -176,22 +176,21 @@ class RoomControllerTest {
     }
 
     @Test
-    @DisplayName("la ruta con barra final NO coincide con el matcher y da 403, no 201")
+    @DisplayName("la ruta con barra final no existe y devuelve 404")
     void laBarraFinalNoCoincideConElMatcher() throws Exception {
-        // Filo cortante documentado a proposito. Desde Spring Boot 3, /v1/rooms y /v1/rooms/ son
-        // URIs distintas: se elimino el emparejamiento tolerante a la barra final. La peticion
-        // con barra no coincide con ningun matcher, cae en anyRequest().denyAll() y devuelve 403
-        // aunque el token sea de ADMIN.
-        //
-        // El codigo es engañoso -dice "sin permisos" cuando el problema es la ruta-, pero es la
-        // consecuencia directa de denegar por defecto, que tambien evita revelar que rutas
-        // existen. Si algun dia se prefiere tolerar la barra, hay que anadir la variante al
-        // matcher y este test pasaria a esperar 404.
+        // Desde Spring Boot 3, /v1/rooms y /v1/rooms/ son rutas distintas.
         mockMvc.perform(post("/v1/rooms/")
                         .header("Authorization", "Bearer " + adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(BODY_VALIDO))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("una ruta inexistente devuelve 404 sin exigir autenticacion")
+    void rutaInexistente() throws Exception {
+        mockMvc.perform(post("/v1/no-existe"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

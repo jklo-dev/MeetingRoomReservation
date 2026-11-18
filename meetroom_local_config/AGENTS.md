@@ -176,6 +176,7 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Creación y cancelación protegidas.
 - Secretos obtenidos mediante configuración externa.
 - Gestión centralizada y segura de errores con tipos y detalles descriptivos.
+- Las rutas inexistentes devuelven `404`, no errores de autenticación o autorización.
 - Swagger UI y el documento OpenAPI son públicos; la autorización de operaciones protegidas se
   documenta mediante el esquema JWT bearer `bearerAuth`.
 

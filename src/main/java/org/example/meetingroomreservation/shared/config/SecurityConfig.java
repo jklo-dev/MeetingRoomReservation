@@ -86,9 +86,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/reservations/*/cancel")
                         .authenticated()
                         .requestMatchers(HttpMethod.GET, "/v1/reservations").permitAll()
-                        // Cualquier otra ruta queda denegada hasta que una funcionalidad
-                        // posterior la abra explicitamente.
-                        .anyRequest().denyAll())
+                        // Las rutas inexistentes llegan a Spring MVC para responder 404.
+                        // Los endpoints existentes estan protegidos expresamente arriba.
+                        .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         // Imprescindible: el servidor de recursos trae su propio entry point,
                         // que responde 401 sin cuerpo y ganaria sobre el global cuando el fallo
