@@ -111,6 +111,9 @@ Reglas específicas:
 Los modelos, restricciones, índices, datos temporales y estrategia de cancelación se definirán
 en sus especificaciones.
 
+La creación de reservas combina comprobación explícita de solapamiento, cerrojo pesimista por
+sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máximo 30 segundos.
+
 ## API
 
 **[Verificado]** No hay endpoints implementados.
@@ -129,6 +132,9 @@ El listado público `GET /v1/rooms` devuelve por defecto salas `ACTIVE`, ordenad
 paginadas con tamaño 20. Admite filtros acumulativos por estado, capacidad mínima y nombre,
 además de ordenación y paginación.
 
+`POST /v1/reservations` permite crear reservas a cualquier usuario autenticado. El responsable
+procede del claim `sub` y los campos desconocidos del cuerpo se ignoran.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -142,6 +148,8 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Login público mediante `POST /v1/users/login`.
 - Creación de usuarios mediante `POST /v1/users`, restringida a `ADMIN`.
 - Creación de salas mediante `POST /v1/rooms`, restringida a `ADMIN`.
+- Creación de reservas mediante `POST /v1/reservations`, disponible para cualquier usuario
+  autenticado.
 - Tokens con vigencia de 24 horas y claims `sub`, `role`, `iat`, `exp` e `iss`.
 - El emisor del token es `meetroom`.
 - No se incluyen renovación ni revocación de tokens.
@@ -198,11 +206,13 @@ meetroom_local_config/specs/NNN-nombre-funcionalidad/
 
 Funcionalidades definidas:
 
-- `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT.
-- `002-autenticacion`: login y emisión de tokens JWT.
-- `003-creacion-salas`: creación de salas por administradores.
-- `004-listado-salas`: listado público de salas con filtros, ordenación y paginación.
+- `001-creacion-usuarios`: creación de usuarios por administradores y validación JWT; pendiente
+  de aprobación.
+- `002-autenticacion`: login y emisión de tokens JWT; aprobada.
+- `003-creacion-salas`: creación de salas por administradores; pendiente de aprobación.
+- `004-listado-salas`: listado público de salas con filtros, ordenación y paginación; aprobada.
+- `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; aprobada.
 
 Funcionalidades previstas:
 
-- `005`: reservas.
+- Cancelación y listado de reservas a partir de `006`.
