@@ -1,0 +1,13 @@
+build/
+.gradle/
+bin/
+out/
+.git/
+.gitignore
+.idea/
+*.iml
+meetroom_local_config/
+README.md
+.env
+docker-compose.yaml
+Dockerfile
