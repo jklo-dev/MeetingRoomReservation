@@ -112,7 +112,7 @@ Los modelos, restricciones, índices, datos temporales y estrategia de cancelaci
 en sus especificaciones.
 
 La creación de reservas combina comprobación explícita de solapamiento, cerrojo pesimista por
-sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máximo 30 segundos.
+sala y una restricción de exclusión en PostgreSQL. El cerrojo espera como máximo 5 segundos.
 
 ## API
 
@@ -135,6 +135,10 @@ además de ordenación y paginación.
 `POST /v1/reservations` permite crear reservas a cualquier usuario autenticado. El responsable
 procede del claim `sub` y los campos desconocidos del cuerpo se ignoran.
 
+`POST /v1/reservations/{id}/cancel` permite cancelar al responsable o a un administrador. Conserva
+la reserva, registra quién y cuándo canceló y usa un bloqueo de fila con espera máxima de 5
+segundos.
+
 Cuando resulte útil, el contrato de un endpoint se documentará junto a su especificación.
 
 ## Seguridad
@@ -150,6 +154,8 @@ Cuando resulte útil, el contrato de un endpoint se documentará junto a su espe
 - Creación de salas mediante `POST /v1/rooms`, restringida a `ADMIN`.
 - Creación de reservas mediante `POST /v1/reservations`, disponible para cualquier usuario
   autenticado.
+- Cancelación mediante `POST /v1/reservations/{id}/cancel`, permitida al responsable o a un
+  administrador.
 - Tokens con vigencia de 24 horas y claims `sub`, `role`, `iat`, `exp` e `iss`.
 - El emisor del token es `meetroom`.
 - No se incluyen renovación ni revocación de tokens.
@@ -212,7 +218,9 @@ Funcionalidades definidas:
 - `003-creacion-salas`: creación de salas por administradores; pendiente de aprobación.
 - `004-listado-salas`: listado público de salas con filtros, ordenación y paginación; aprobada.
 - `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; aprobada.
+- `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
+  aprobada.
 
 Funcionalidades previstas:
 
-- Cancelación y listado de reservas a partir de `006`.
+- Listado de reservas a partir de `007`.

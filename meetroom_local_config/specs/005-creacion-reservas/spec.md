@@ -197,7 +197,7 @@ bloquean entre sí.
 La restricción de exclusión garantiza que tampoco puedan introducirse solapamientos mediante otra
 instancia, scripts o accesos directos a la base de datos.
 
-Si el cerrojo no se obtiene en 30 segundos, se devuelve `503 room-busy`.
+Si el cerrojo no se obtiene en 5 segundos, se devuelve `503 room-busy`.
 
 Toda la lectura de la sala, comprobación de solapamiento e inserción ocurre en una sola transacción
 con aislamiento `READ COMMITTED`.
@@ -218,7 +218,7 @@ Todas las respuestas utilizan `application/problem+json`.
 | `404` | `/problems/room-not-found` | Sala inexistente |
 | `409` | `/problems/room-not-available` | Sala inactiva |
 | `409` | `/problems/reservation-overlap` | Horario ocupado |
-| `503` | `/problems/room-busy` | Cerrojo no obtenido en 30 segundos |
+| `503` | `/problems/room-busy` | Cerrojo no obtenido en 5 segundos |
 
 Solo `validation-error` incluye el array `errors`.
 
