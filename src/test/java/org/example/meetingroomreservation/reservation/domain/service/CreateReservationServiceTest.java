@@ -61,6 +61,11 @@ class CreateReservationServiceTest {
             }
             return existe ? Optional.of(sala) : Optional.empty();
         }
+
+        @Override
+        public Optional<RoomSnapshot> findWithoutLock(UUID roomId) {
+            return existe ? Optional.of(sala) : Optional.empty();
+        }
     }
 
     private static final class FakeReservations implements ReservationRepositoryPort {
@@ -72,6 +77,11 @@ class CreateReservationServiceTest {
         public boolean existsActiveOverlapping(UUID roomId, TimeRange period) {
             consultoSolapamiento = true;
             return haySolapamiento;
+        }
+
+        @Override
+        public Optional<Reservation> findById(UUID reservationId) {
+            return guardadas.stream().filter(r -> r.id().equals(reservationId)).findFirst();
         }
 
         @Override
@@ -205,16 +215,6 @@ class CreateReservationServiceTest {
                 .isInstanceOf(ReservationExceptions.Overlap.class);
 
         assertThat(reservations.guardadas).isEmpty();
-    }
-
-    @Test
-    @DisplayName("rechaza como no autenticado al responsable inexistente")
-    void rechazaResponsableInexistente() {
-        CreateReservationCommand command = new CreateReservationCommand(
-                SALA, UUID.randomUUID(), hora("10:00"), hora("11:00"), 6);
-
-        assertThatThrownBy(() -> service.create(command))
-                .isInstanceOf(ReservationExceptions.InvalidAuthenticatedUser.class);
     }
 
     @Test

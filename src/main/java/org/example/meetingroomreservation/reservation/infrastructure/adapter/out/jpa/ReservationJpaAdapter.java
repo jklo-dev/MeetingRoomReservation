@@ -32,6 +32,11 @@ class ReservationJpaAdapter implements ReservationRepositoryPort {
     }
 
     @Override
+    public java.util.Optional<Reservation> findById(UUID reservationId) {
+        return repository.findById(reservationId).map(ReservationJpaEntity::toDomain);
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         try {
             // flush explicito: sin el, la violacion de la restriccion afloraria al confirmar la

@@ -15,13 +15,6 @@ public final class ReservationExceptions {
     private ReservationExceptions() {
     }
 
-    /** 401: el token no identifica a un usuario valido de la aplicacion. */
-    public static class InvalidAuthenticatedUser extends RuntimeException {
-        public InvalidAuthenticatedUser() {
-            super("Se requiere un usuario autenticado valido");
-        }
-    }
-
     /** 400: el fin no es posterior al inicio. */
     public static class InvalidTimeRange extends RuntimeException {
         public InvalidTimeRange() {
@@ -66,6 +59,44 @@ public final class ReservationExceptions {
     public static class RoomNotFound extends RuntimeException {
         public RoomNotFound() {
             super("La sala indicada no existe");
+        }
+    }
+
+    /** 404: el identificador de reserva no corresponde a ninguna reserva. */
+    public static class NotFound extends RuntimeException {
+        public NotFound() {
+            super("La reserva indicada no existe");
+        }
+    }
+
+    /**
+     * 403: quien solicita no es el responsable de la reserva ni un administrador.
+     *
+     * <p>Se evalua **antes** que el estado y el tiempo: lo contrario convertiria los codigos de
+     * error en un canal para sondear el estado de reservas ajenas.
+     */
+    public static class NotAllowedToCancel extends RuntimeException {
+        public NotAllowedToCancel() {
+            super("Solo el responsable de la reserva o un administrador pueden cancelarla");
+        }
+    }
+
+    /** 409: la reserva ya estaba cancelada. */
+    public static class AlreadyCancelled extends RuntimeException {
+        public AlreadyCancelled() {
+            super("La reserva ya estaba cancelada");
+        }
+    }
+
+    /**
+     * 409: la reserva ya ha finalizado.
+     *
+     * <p>Cancelarla no liberaria nada y solo falsearia el historial. Una reserva **en curso** si
+     * se puede cancelar: libera la sala para el tiempo restante.
+     */
+    public static class AlreadyFinished extends RuntimeException {
+        public AlreadyFinished() {
+            super("La reserva ya ha finalizado y no puede cancelarse");
         }
     }
 

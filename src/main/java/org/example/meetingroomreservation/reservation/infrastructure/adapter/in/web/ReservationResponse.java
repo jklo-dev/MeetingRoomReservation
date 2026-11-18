@@ -3,6 +3,8 @@ package org.example.meetingroomreservation.reservation.infrastructure.adapter.in
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.example.meetingroomreservation.reservation.domain.model.Reservation;
 import org.example.meetingroomreservation.reservation.domain.model.ReservationOwner;
 import org.example.meetingroomreservation.reservation.domain.model.ReservationStatus;
@@ -23,7 +25,18 @@ record ReservationResponse(
         OffsetDateTime endsAt,
         int attendees,
         ReservationStatus status,
-        OffsetDateTime createdAt) {
+        OffsetDateTime createdAt,
+
+        /**
+         * Instante de la cancelacion. Se **omite** del JSON mientras la reserva esta activa, en
+         * lugar de enviarse como null, para no ensuciar la respuesta de la creacion.
+         *
+         * <p>No existe un campo equivalente para quien cancelo: se almacena solo para auditoria,
+         * porque el listado de reservas es publico y publicarlo revelaria sin credenciales que un
+         * administrador cancelo la reunion de otra persona.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        OffsetDateTime cancelledAt) {
 
     /** Nunca incluye el estado de la sala: no es informacion de la reserva. */
     record Room(UUID id, String name, int capacity) {
@@ -43,6 +56,7 @@ record ReservationResponse(
                 reservation.period().end(),
                 reservation.attendees(),
                 reservation.status(),
-                reservation.createdAt());
+                reservation.createdAt(),
+                reservation.cancelledAt().orElse(null));
     }
 }

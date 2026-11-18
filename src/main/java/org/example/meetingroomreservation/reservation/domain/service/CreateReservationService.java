@@ -71,7 +71,8 @@ public class CreateReservationService implements CreateReservation {
         }
 
         ReservationOwner owner = owners.findById(command.ownerId())
-                .orElseThrow(ReservationExceptions.InvalidAuthenticatedUser::new);
+                .orElseThrow(() -> new IllegalStateException(
+                        "el responsable del token no existe: " + command.ownerId()));
 
         // Paso 7: si la restriccion de exclusion la rechaza, el adaptador traduce la violacion a
         // la misma excepcion de solapamiento.

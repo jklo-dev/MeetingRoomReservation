@@ -1,5 +1,6 @@
 package org.example.meetingroomreservation.reservation.domain.port.out;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.example.meetingroomreservation.reservation.domain.model.Reservation;
@@ -18,6 +19,8 @@ public interface ReservationRepositoryPort {
      * la aportan el cerrojo y la restriccion de exclusion.
      */
     boolean existsActiveOverlapping(UUID roomId, TimeRange period);
+
+    Optional<Reservation> findById(UUID reservationId);
 
     /**
      * @throws org.example.meetingroomreservation.reservation.domain.exception.ReservationExceptions.Overlap

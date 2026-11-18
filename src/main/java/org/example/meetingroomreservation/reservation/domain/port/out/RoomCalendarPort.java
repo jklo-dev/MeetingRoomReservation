@@ -26,4 +26,14 @@ public interface RoomCalendarPort {
      *         si no se consigue el acceso exclusivo en el tiempo maximo de espera
      */
     Optional<RoomSnapshot> lockAndGet(UUID roomId);
+
+    /**
+     * Lee los datos de la sala **sin** tomar ningun cerrojo.
+     *
+     * <p>Lo usan las operaciones que no deciden nada en funcion de la disponibilidad, como la
+     * cancelacion: afectan a una fila identificada por clave primaria y solo necesitan el nombre
+     * y la capacidad de la sala para componer la respuesta. Tomar el cerrojo ahi seria un coste
+     * sin ninguna garantia a cambio.
+     */
+    Optional<RoomSnapshot> findWithoutLock(UUID roomId);
 }

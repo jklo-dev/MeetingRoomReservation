@@ -146,13 +146,6 @@ public class GlobalExceptionHandler {
 
     // --- Reservas: cada causa con su propio tipo, aunque compartan codigo HTTP ---
 
-    @ExceptionHandler(ReservationExceptions.InvalidAuthenticatedUser.class)
-    ProblemDetail handleInvalidAuthenticatedUser(
-            ReservationExceptions.InvalidAuthenticatedUser e, WebRequest request) {
-        return problem(HttpStatus.UNAUTHORIZED, e.getMessage(),
-                ProblemTypes.AUTHENTICATION_REQUIRED, request);
-    }
-
     @ExceptionHandler(ReservationExceptions.InvalidTimeRange.class)
     ProblemDetail handleInvalidTimeRange(ReservationExceptions.InvalidTimeRange e,
                                          WebRequest request) {
@@ -207,6 +200,38 @@ public class GlobalExceptionHandler {
     ProblemDetail handleRoomBusy(ReservationExceptions.RoomBusy e, WebRequest request) {
         return problem(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage(), ProblemTypes.ROOM_BUSY,
                 request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.NotFound.class)
+    ProblemDetail handleReservationNotFound(ReservationExceptions.NotFound e,
+                                            WebRequest request) {
+        return problem(HttpStatus.NOT_FOUND, e.getMessage(), ProblemTypes.RESERVATION_NOT_FOUND,
+                request);
+    }
+
+    /**
+     * Comparte tipo con el 403 de rol insuficiente: desde el punto de vista del cliente es el
+     * mismo problema, no tener permiso para la operacion. El {@code detail} si precisa la causa.
+     */
+    @ExceptionHandler(ReservationExceptions.NotAllowedToCancel.class)
+    ProblemDetail handleNotAllowedToCancel(ReservationExceptions.NotAllowedToCancel e,
+                                           WebRequest request) {
+        return problem(HttpStatus.FORBIDDEN, e.getMessage(), ProblemTypes.INSUFFICIENT_ROLE,
+                request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.AlreadyCancelled.class)
+    ProblemDetail handleAlreadyCancelled(ReservationExceptions.AlreadyCancelled e,
+                                         WebRequest request) {
+        return problem(HttpStatus.CONFLICT, e.getMessage(),
+                ProblemTypes.RESERVATION_ALREADY_CANCELLED, request);
+    }
+
+    @ExceptionHandler(ReservationExceptions.AlreadyFinished.class)
+    ProblemDetail handleAlreadyFinished(ReservationExceptions.AlreadyFinished e,
+                                        WebRequest request) {
+        return problem(HttpStatus.CONFLICT, e.getMessage(),
+                ProblemTypes.RESERVATION_ALREADY_FINISHED, request);
     }
 
     /**

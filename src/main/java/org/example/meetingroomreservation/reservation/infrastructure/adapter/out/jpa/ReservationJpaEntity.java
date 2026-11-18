@@ -50,6 +50,12 @@ class ReservationJpaEntity {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "cancelled_at")
+    private OffsetDateTime cancelledAt;
+
+    @Column(name = "cancelled_by")
+    private UUID cancelledBy;
+
     protected ReservationJpaEntity() {
         // Requerido por JPA.
     }
@@ -64,11 +70,13 @@ class ReservationJpaEntity {
         entity.attendees = reservation.attendees();
         entity.status = reservation.status();
         entity.createdAt = reservation.createdAt();
+        entity.cancelledAt = reservation.cancelledAt().orElse(null);
+        entity.cancelledBy = reservation.cancelledBy().orElse(null);
         return entity;
     }
 
     Reservation toDomain() {
         return Reservation.restore(id, roomId, ownerId, new TimeRange(startsAt, endsAt),
-                attendees, status, createdAt);
+                attendees, status, createdAt, cancelledAt, cancelledBy);
     }
 }

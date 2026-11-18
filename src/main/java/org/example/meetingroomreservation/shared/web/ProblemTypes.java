@@ -37,6 +37,12 @@ public final class ProblemTypes {
     public static final URI ROOM_NOT_AVAILABLE = URI.create(PREFIX + "room-not-available");
     public static final URI RESERVATION_OVERLAP = URI.create(PREFIX + "reservation-overlap");
     public static final URI ROOM_BUSY = URI.create(PREFIX + "room-busy");
+    public static final URI RESERVATION_NOT_FOUND =
+            URI.create(PREFIX + "reservation-not-found");
+    public static final URI RESERVATION_ALREADY_CANCELLED =
+            URI.create(PREFIX + "reservation-already-cancelled");
+    public static final URI RESERVATION_ALREADY_FINISHED =
+            URI.create(PREFIX + "reservation-already-finished");
 
     private ProblemTypes() {
     }

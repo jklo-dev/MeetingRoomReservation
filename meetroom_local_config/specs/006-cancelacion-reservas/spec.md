@@ -1,6 +1,6 @@
 # 006 — Cancelación de reservas
 
-**Estado**: aprobada.
+**Estado**: implementada.
 
 ## 1. Objetivo
 
@@ -57,7 +57,7 @@ bloquear el horario.
 | --- | --- | --- |
 | 1 | Identificador UUID válido | `400 validation-error` |
 | 2 | Reserva existente | `404 reservation-not-found` |
-| 3 | Solicitante propietario o `ADMIN` | `403 insufficient-permissions` |
+| 3 | Solicitante propietario o `ADMIN` | `403 insufficient-role` |
 | 4 | Reserva en estado `ACTIVE` | `409 reservation-already-cancelled` |
 | 5 | Fin posterior al momento actual | `409 reservation-already-finished` |
 | 6 | Cambio a `CANCELLED` y auditoría | `200` |
@@ -73,7 +73,7 @@ bloquear el horario.
 La reserva se lee con bloqueo de fila dentro de la transacción. Dos cancelaciones simultáneas
 producen una respuesta `200` y una `409 reservation-already-cancelled`.
 
-Si el bloqueo no se obtiene en 5 segundos, se devuelve `503 reservation-busy`. El bloqueo se
+Si el bloqueo no se obtiene en 30 segundos, se devuelve `503 reservation-busy`. El bloqueo se
 libera al confirmar o revertir la transacción.
 
 ## 6. Endpoint
@@ -125,17 +125,17 @@ Todas las respuestas utilizan `application/problem+json`.
 
 | Estado | Tipo | Causa |
 | --- | --- | --- |
-| `400` | `/problems/validation-error` | Identificador inválido |
-| `401` | `/problems/authentication-required` | Token ausente o inválido |
-| `403` | `/problems/insufficient-permissions` | No es propietario ni administrador |
-| `404` | `/problems/reservation-not-found` | Reserva inexistente |
-| `409` | `/problems/reservation-already-cancelled` | Reserva ya cancelada |
-| `409` | `/problems/reservation-already-finished` | Reserva ya finalizada |
-| `503` | `/problems/reservation-busy` | Bloqueo no obtenido en 5 segundos |
+| `400` | `urn:meetroom:problem:validation-error` | Identificador inválido |
+| `401` | `urn:meetroom:problem:authentication-required` | Token ausente, inválido o sin usuario existente |
+| `403` | `urn:meetroom:problem:insufficient-role` | No es propietario ni administrador |
+| `404` | `urn:meetroom:problem:reservation-not-found` | Reserva inexistente |
+| `409` | `urn:meetroom:problem:reservation-already-cancelled` | Reserva ya cancelada |
+| `409` | `urn:meetroom:problem:reservation-already-finished` | Reserva ya finalizada |
+| `503` | `urn:meetroom:problem:reservation-busy` | Bloqueo no obtenido en 30 segundos |
 
 ```json
 {
-  "type": "/problems/reservation-already-cancelled",
+  "type": "urn:meetroom:problem:reservation-already-cancelled",
   "title": "Reserva ya cancelada",
   "status": 409,
   "detail": "La reserva ya estaba cancelada",
@@ -197,7 +197,7 @@ Se comprobarán:
 - Persistencia de auditoría.
 - Liberación efectiva del horario.
 - Restricción de coherencia mediante escritura directa.
-- Dos cancelaciones simultáneas y espera máxima de 5 segundos.
+- Dos cancelaciones simultáneas y espera máxima de 30 segundos.
 
 ## 12. Limitaciones conocidas
 

@@ -38,13 +38,14 @@ Quedan fuera del alcance mientras no se aprueben expresamente:
 ## Estado actual
 
 **[Verificado]** Las funcionalidades 001 de creación de usuarios, 002 de autenticación, 003 de
-creación de salas, 004 de listado de salas y 005 de creación de reservas están implementadas.
+creación de salas, 004 de listado de salas, 005 de creación de reservas y 006 de cancelación de
+reservas están implementadas.
 
 Actualmente existen el dominio de usuarios, los casos de uso de creación y autenticación,
 adaptadores web, JPA y JWT, migraciones Flyway, validación y emisión de tokens, manejo centralizado
 de errores y pruebas de dominio, web e integración con PostgreSQL mediante Testcontainers.
 También existen los dominios de salas y reservas, sus casos de uso implementados, adaptadores web
-y JPA y las migraciones hasta `V4__create_reservations_table.sql`.
+y JPA y las migraciones hasta `V5__add_reservation_cancellation.sql`.
 
 ## Tecnologías verificadas
 
@@ -134,9 +135,10 @@ además de ordenación y paginación.
 `POST /v1/reservations` permite crear reservas a cualquier usuario autenticado. El responsable
 procede del claim `sub` y los campos desconocidos del cuerpo se ignoran.
 
-`POST /v1/reservations/{id}/cancel` permite cancelar al responsable o a un administrador. Conserva
-la reserva, registra quién y cuándo canceló y usa un bloqueo de fila con espera máxima de 5
-segundos.
+**[Verificado]** `POST /v1/reservations/{id}/cancel` permite cancelar al responsable o a un
+administrador. Conserva la reserva y registra quién y cuándo canceló.
+
+**[Decidido]** La cancelación usa un bloqueo de fila con espera máxima de 30 segundos.
 
 `GET /v1/reservations` es público y admite filtros acumulativos por sala, responsable, estado y
 rango temporal. El rango usa semántica semiabierta; el resultado se ordena por inicio y está
@@ -225,5 +227,5 @@ Funcionalidades definidas:
   implementada.
 - `005-creacion-reservas`: creación transaccional de reservas sin solapamientos; implementada.
 - `006-cancelacion-reservas`: cancelación con auditoría por el responsable o un administrador;
-  aprobada.
+  implementada.
 - `007-listado-reservas`: listado público con filtros, ordenación y paginación; aprobada.

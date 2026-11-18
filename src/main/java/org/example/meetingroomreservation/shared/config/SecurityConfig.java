@@ -74,6 +74,11 @@ public class SecurityConfig {
                         // Requiere autenticacion pero ningun rol concreto: cualquier usuario
                         // autenticado puede reservar.
                         .requestMatchers(HttpMethod.POST, "/v1/reservations").authenticated()
+                        // Solo exige autenticacion: el permiso depende de comparar el usuario
+                        // del token con el responsable de esa reserva concreta, dato que solo se
+                        // conoce tras consultarla. La autorizacion se resuelve en el caso de uso.
+                        .requestMatchers(HttpMethod.POST, "/v1/reservations/*/cancel")
+                        .authenticated()
                         // Cualquier otra ruta queda denegada hasta que una funcionalidad
                         // posterior la abra explicitamente.
                         .anyRequest().denyAll())
